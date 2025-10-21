@@ -4,8 +4,7 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import connectToDatabase from './config/env.js';
-
-
+import connectCloudinary from './config/cloudinary.js';
 
 dotenv.config();
 
@@ -13,7 +12,7 @@ dotenv.config();
 // app config
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+connectCloudinary();
 
 // middlewares
 app.use(express.json());
