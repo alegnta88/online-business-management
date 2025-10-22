@@ -1,5 +1,6 @@
 import ProductModel from '../models/productModel.js';
 import validator from 'validator';
+import mongoose from 'mongoose';
 
 // Function to create a new product
 const addProduct = async (req, res) => {
