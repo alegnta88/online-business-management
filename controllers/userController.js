@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
 
-
 // User Registration Logic
 const registerUser = async (req, res) => {
   try {
@@ -64,18 +63,18 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
     
     const user = await UserModel.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Incorrect Email' });
+      return res.status(401).json({ success: false, message: 'Incorrect Email' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect password" });
+      return res.status(401).json({ success: false, message: "Incorrect password" });
     }
 
     // JWT token generation
@@ -98,10 +97,10 @@ const loginUser = async (req, res) => {
 const adminLogin = async (req, res) => {
   try {
     
-    res.status(501).json({ message: 'Admin login not implemented yet' });
+    res.status(501).json({ success: false, message: 'Admin login not implemented yet' });
   } catch (error) {
     console.error('Admin login error:', error);
-    res.status(500).json({ message: 'Server error during admin login' });
+    res.status(500).json({ success: false, message: 'Server error during admin login' });
   }
 }
 
@@ -111,8 +110,8 @@ const getAllUsers = async (req, res) => {
     res.json(users);
   } catch (error) {
     console.error('Get users error:', error);
-    res.status(500).json({ message: 'Server error fetching users' });
-  }
+    res.status(500).json({ success: false, message: 'Server error fetching users' });
+  } 
 }
 
 export { registerUser, loginUser, adminLogin, getAllUsers }
