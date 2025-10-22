@@ -88,11 +88,24 @@ const addProduct = async (req, res) => {
 // Function to list all products
 const listProduct = async (req, res) => {
     try {
-        const products = await ProductModel.find({}).sort({ date: -1 });
+        const { category, bestseller, page = 1, limit = 1 } = req.query;
         
+        const filter = {};
+        if (category) filter.category = category;
+        if (bestseller) filter.bestseller = bestseller === 'true';
+
+        const products = await ProductModel.find(filter)
+            .sort({ date: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const count = await ProductModel.countDocuments(filter);
+
         res.status(200).json({ 
             success: true, 
-            count: products.length,
+            count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
             products 
         });
 
