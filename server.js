@@ -5,6 +5,8 @@ import connectToDatabase from './config/env.js';
 import connectCloudinary from './config/cloudinary.js';
 import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
+import productRouter from './routes/productRoute.js';
+import multer from './middleware/multer.js';
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ app.use(morgan("dev"));
 
 //api endpoints
 app.use('/api/users', userRouter);
+app.use('/api/products', productRouter);
 
 //api routes
 app.get('/', (req, res) => {
