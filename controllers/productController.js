@@ -1,4 +1,5 @@
-
+import UserModel from '../models/productModel.js';
+import validator from 'validator';
 
 
 // function to create a new product
