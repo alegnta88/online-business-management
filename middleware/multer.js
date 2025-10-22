@@ -1,11 +1,9 @@
-// middleware/multer.js
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
 // Define upload directory
 const uploadDir = 'uploads/';
-
 
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
