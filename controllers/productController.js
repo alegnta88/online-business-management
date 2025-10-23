@@ -1,5 +1,7 @@
 import ProductModel from '../models/productModel.js';
 import validator from 'validator';
+import mongoose from 'mongoose';
+import { v2 as cloudinary } from 'cloudinary';
 
 // Function to create a new product
 const addProduct = async (req, res) => {
@@ -24,14 +26,32 @@ const addProduct = async (req, res) => {
 
         const imageArray = [];
         
+        // Cloudinary configuration 
+        const cloudinaryConfig = {
+            cloud_name: process.env.CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_SECRET
+        };
+        
+       
         if (req.file) {
-            // Single file upload
-            imageArray.push(req.file.filename);
-        } else if (req.files && req.files.length > 0) {
-            // Multiple files upload
-            req.files.forEach(file => {
-                imageArray.push(file.filename);
+            
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'products',
+                resource_type: 'image',
+                ...cloudinaryConfig
             });
+            imageArray.push(result.secure_url);
+        } else if (req.files && req.files.length > 0) {
+            
+            for (const file of req.files) {
+                const result = await cloudinary.uploader.upload(file.path, {
+                    folder: 'products',
+                    resource_type: 'image',
+                    ...cloudinaryConfig
+                });
+                imageArray.push(result.secure_url);
+            }
         }
         
         if (imageArray.length === 0) {
@@ -41,7 +61,6 @@ const addProduct = async (req, res) => {
             });
         }
 
-        // Parse sizes if it's a JSON string
         let parsedSizes = [];
         if (sizes) {
             try {
@@ -87,11 +106,24 @@ const addProduct = async (req, res) => {
 // Function to list all products
 const listProduct = async (req, res) => {
     try {
-        const products = await ProductModel.find({}).sort({ date: -1 });
+        const { category, bestseller, page = 1, limit = 10 } = req.query;
         
+        const filter = {};
+        if (category) filter.category = category;
+        if (bestseller) filter.bestseller = bestseller === 'true';
+
+        const products = await ProductModel.find(filter)
+            .sort({ date: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const count = await ProductModel.countDocuments(filter);
+
         res.status(200).json({ 
             success: true, 
-            count: products.length,
+            count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
             products 
         });
 
@@ -125,8 +157,8 @@ const removeProduct = async (req, res) => {
             });
         }
 
-        // Find and delete product
-        const product = await ProductModel.findByIdAndDelete(id);
+        // Find product first to get image URLs
+        const product = await ProductModel.findById(id);
 
         if (!product) {
             return res.status(404).json({ 
@@ -134,6 +166,27 @@ const removeProduct = async (req, res) => {
                 message: 'Product not found' 
             });
         }
+
+        
+        if (product.image && product.image.length > 0) {
+            const cloudinaryConfig = {
+                cloud_name: process.env.CLOUD_NAME,
+                api_key: process.env.CLOUDINARY_API_KEY,
+                api_secret: process.env.CLOUDINARY_SECRET
+            };
+            
+            for (const imageUrl of product.image) {
+                const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
+                try {
+                    await cloudinary.uploader.destroy(publicId, cloudinaryConfig);
+                } catch (error) {
+                    console.error('Error deleting image from Cloudinary:', error);
+                }
+            }
+        }
+
+        // Delete product from database
+        await ProductModel.findByIdAndDelete(id);
 
         res.status(200).json({ 
             success: true, 
