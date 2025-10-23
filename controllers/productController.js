@@ -167,7 +167,7 @@ const removeProduct = async (req, res) => {
             });
         }
 
-        // Delete images from Cloudinary
+        
         if (product.image && product.image.length > 0) {
             const cloudinaryConfig = {
                 cloud_name: process.env.CLOUD_NAME,
@@ -176,7 +176,6 @@ const removeProduct = async (req, res) => {
             };
             
             for (const imageUrl of product.image) {
-                // Extract public_id from Cloudinary URL
                 const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
                 try {
                     await cloudinary.uploader.destroy(publicId, cloudinaryConfig);
