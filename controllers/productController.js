@@ -1,10 +1,16 @@
 import ProductModel from '../models/productModel.js';
 import validator from 'validator';
 import mongoose from 'mongoose';
+import { v2 as cloudinary } from 'cloudinary';
 
 // Function to create a new product
 const addProduct = async (req, res) => {
     try {
+        console.log('=== Add Product Request ===');
+        console.log('Body:', req.body);
+        console.log('File:', req.file);
+        console.log('Files:', req.files);
+        
         const { name, price, description, category, subcategory, sizes, bestseller } = req.body;
 
         // Validation
@@ -25,14 +31,37 @@ const addProduct = async (req, res) => {
 
         const imageArray = [];
         
+        // Cloudinary configuration
+        const cloudinaryConfig = {
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET
+        };
+        
+        // Upload images to Cloudinary
         if (req.file) {
             // Single file upload
-            imageArray.push(req.file.filename);
+            console.log('Uploading single file to Cloudinary:', req.file.path);
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'products',
+                resource_type: 'image',
+                ...cloudinaryConfig
+            });
+            console.log('Upload result:', result.secure_url);
+            imageArray.push(result.secure_url);
         } else if (req.files && req.files.length > 0) {
             // Multiple files upload
-            req.files.forEach(file => {
-                imageArray.push(file.filename);
-            });
+            console.log('Uploading multiple files to Cloudinary:', req.files.length);
+            for (const file of req.files) {
+                console.log('Uploading file:', file.path);
+                const result = await cloudinary.uploader.upload(file.path, {
+                    folder: 'products',
+                    resource_type: 'image',
+                    ...cloudinaryConfig
+                });
+                console.log('Upload result:', result.secure_url);
+                imageArray.push(result.secure_url);
+            }
         }
         
         if (imageArray.length === 0) {
@@ -69,6 +98,9 @@ const addProduct = async (req, res) => {
         const product = new ProductModel(productData);
         await product.save();
 
+        console.log('Product saved successfully:', product._id);
+        console.log('==========================');
+
         res.status(201).json({ 
             success: true, 
             message: 'Product added successfully',
@@ -88,7 +120,7 @@ const addProduct = async (req, res) => {
 // Function to list all products
 const listProduct = async (req, res) => {
     try {
-        const { category, bestseller, page = 1, limit = 1 } = req.query;
+        const { category, bestseller, page = 1, limit = 10 } = req.query;
         
         const filter = {};
         if (category) filter.category = category;
@@ -139,8 +171,8 @@ const removeProduct = async (req, res) => {
             });
         }
 
-        // Find and delete product
-        const product = await ProductModel.findByIdAndDelete(id);
+        // Find product first to get image URLs
+        const product = await ProductModel.findById(id);
 
         if (!product) {
             return res.status(404).json({ 
@@ -148,6 +180,28 @@ const removeProduct = async (req, res) => {
                 message: 'Product not found' 
             });
         }
+
+        // Delete images from Cloudinary
+        if (product.image && product.image.length > 0) {
+            const cloudinaryConfig = {
+                cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+                api_key: process.env.CLOUDINARY_API_KEY,
+                api_secret: process.env.CLOUDINARY_API_SECRET
+            };
+            
+            for (const imageUrl of product.image) {
+                // Extract public_id from Cloudinary URL
+                const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
+                try {
+                    await cloudinary.uploader.destroy(publicId, cloudinaryConfig);
+                } catch (error) {
+                    console.error('Error deleting image from Cloudinary:', error);
+                }
+            }
+        }
+
+        // Delete product from database
+        await ProductModel.findByIdAndDelete(id);
 
         res.status(200).json({ 
             success: true, 
