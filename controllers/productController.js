@@ -175,6 +175,7 @@ const removeProduct = async (req, res) => {
                 api_secret: process.env.CLOUDINARY_SECRET
             };
             
+            
             for (const imageUrl of product.image) {
                 const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
                 try {
