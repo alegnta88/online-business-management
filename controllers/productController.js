@@ -6,11 +6,6 @@ import { v2 as cloudinary } from 'cloudinary';
 // Function to create a new product
 const addProduct = async (req, res) => {
     try {
-        console.log('=== Add Product Request ===');
-        console.log('Body:', req.body);
-        console.log('File:', req.file);
-        console.log('Files:', req.files);
-        
         const { name, price, description, category, subcategory, sizes, bestseller } = req.body;
 
         // Validation
@@ -31,35 +26,30 @@ const addProduct = async (req, res) => {
 
         const imageArray = [];
         
-        // Cloudinary configuration
+        // Cloudinary configuration (using your env variable names)
         const cloudinaryConfig = {
-            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            cloud_name: process.env.CLOUD_NAME,
             api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET
+            api_secret: process.env.CLOUDINARY_SECRET
         };
         
         // Upload images to Cloudinary
         if (req.file) {
             // Single file upload
-            console.log('Uploading single file to Cloudinary:', req.file.path);
             const result = await cloudinary.uploader.upload(req.file.path, {
                 folder: 'products',
                 resource_type: 'image',
                 ...cloudinaryConfig
             });
-            console.log('Upload result:', result.secure_url);
             imageArray.push(result.secure_url);
         } else if (req.files && req.files.length > 0) {
             // Multiple files upload
-            console.log('Uploading multiple files to Cloudinary:', req.files.length);
             for (const file of req.files) {
-                console.log('Uploading file:', file.path);
                 const result = await cloudinary.uploader.upload(file.path, {
                     folder: 'products',
                     resource_type: 'image',
                     ...cloudinaryConfig
                 });
-                console.log('Upload result:', result.secure_url);
                 imageArray.push(result.secure_url);
             }
         }
@@ -97,9 +87,6 @@ const addProduct = async (req, res) => {
         // Save to database
         const product = new ProductModel(productData);
         await product.save();
-
-        console.log('Product saved successfully:', product._id);
-        console.log('==========================');
 
         res.status(201).json({ 
             success: true, 
@@ -184,9 +171,9 @@ const removeProduct = async (req, res) => {
         // Delete images from Cloudinary
         if (product.image && product.image.length > 0) {
             const cloudinaryConfig = {
-                cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+                cloud_name: process.env.CLOUD_NAME,
                 api_key: process.env.CLOUDINARY_API_KEY,
-                api_secret: process.env.CLOUDINARY_API_SECRET
+                api_secret: process.env.CLOUDINARY_SECRET
             };
             
             for (const imageUrl of product.image) {
