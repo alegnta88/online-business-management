@@ -26,16 +26,16 @@ const addProduct = async (req, res) => {
 
         const imageArray = [];
         
-        // Cloudinary configuration (using your env variable names)
+        // Cloudinary configuration 
         const cloudinaryConfig = {
             cloud_name: process.env.CLOUD_NAME,
             api_key: process.env.CLOUDINARY_API_KEY,
             api_secret: process.env.CLOUDINARY_SECRET
         };
         
-        // Upload images to Cloudinary
+       
         if (req.file) {
-            // Single file upload
+            
             const result = await cloudinary.uploader.upload(req.file.path, {
                 folder: 'products',
                 resource_type: 'image',
@@ -43,7 +43,7 @@ const addProduct = async (req, res) => {
             });
             imageArray.push(result.secure_url);
         } else if (req.files && req.files.length > 0) {
-            // Multiple files upload
+            
             for (const file of req.files) {
                 const result = await cloudinary.uploader.upload(file.path, {
                     folder: 'products',
@@ -61,7 +61,6 @@ const addProduct = async (req, res) => {
             });
         }
 
-        // Parse sizes if it's a JSON string
         let parsedSizes = [];
         if (sizes) {
             try {
