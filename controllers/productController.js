@@ -1,5 +1,4 @@
 import ProductModel from '../models/productModel.js';
-import validator from 'validator';
 import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
 
@@ -175,6 +174,7 @@ const removeProduct = async (req, res) => {
                 api_secret: process.env.CLOUDINARY_SECRET
             };
             
+
             for (const imageUrl of product.image) {
                 const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
                 try {
