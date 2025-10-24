@@ -6,9 +6,9 @@ import validator from 'validator';
 // User Registration Logic
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, phone, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !phone || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -35,7 +35,8 @@ const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new UserModel({ 
-      name, 
+      name,
+      phone, 
       email, 
       password: hashedPassword 
     });
