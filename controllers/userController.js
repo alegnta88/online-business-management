@@ -2,8 +2,9 @@ import UserModel from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
+import { sendSMS } from '../utils/sendSMS.js';
+import { generateOTP } from '../utils/otpGenerator.js';
 
-// User Registration Logic
 const registerUser = async (req, res) => {
   try {
     const { name, phone, email, password } = req.body;
@@ -34,31 +35,68 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new UserModel({ 
+
+    // Generate 4-digit OTP
+    const otp = generateOTP(4);
+
+    const newUser = new UserModel({
       name,
-      phone, 
-      email, 
-      password: hashedPassword 
+      phone,
+      email,
+      password: hashedPassword,
+      otp,
+      isVerified: false
     });
 
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    // Send OTP via SMS
+    const smsText = `Your verification code is ${otp}`;
+    const smsSent = await sendSMS(phone, smsText);
 
-    res.status(201).json({ 
-      message: 'User registered successfully',
-      token,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email }
+    if (!smsSent) {
+      return res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+    }
+
+    res.status(201).json({
+      message: 'User registered successfully. OTP sent to phone.',
+      userId: newUser._id
     });
 
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration' });
   }
-}
+};
 
+const verifyOTP = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
 
-// User Login Logic
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    user.isVerified = true;
+    user.otp = undefined; 
+    await user.save();
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+    res.json({
+      message: 'OTP verified successfully',
+      token,
+      user: { id: user._id, name: user.name, email: user.email }
+    });
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    res.status(500).json({ message: 'Server error during OTP verification' });
+  }
+};
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,21 +105,19 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
-    
     const user = await UserModel.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'Incorrect Email' });
+    if (!user) return res.status(401).json({ success: false, message: 'Incorrect Email' });
+
+    if (!user.isVerified) {
+      return res.status(403).json({ success: false, message: 'Account not verified. Please check your OTP.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Incorrect password" });
-    }
+    if (!isMatch) return res.status(401).json({ success: false, message: 'Incorrect password' });
 
-    // JWT token generation
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    res.json({ 
+    res.json({
       message: 'User logged in successfully',
       token,
       user: { id: user._id, name: user.name, email: user.email }
@@ -91,27 +127,23 @@ const loginUser = async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error during login' });
   }
-}
+};
 
-
-// Admin Login Logic
 const adminLogin = async (req, res) => {
   try {
-
-    const {email, password} = req.body
+    const { email, password } = req.body;
 
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      const token = jwt.sign(email+password, process.env.JWT_SECRET);
-      res.json({success: true, token})
+      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+      res.json({ success: true, token });
     } else {
-      res.json({success: false, message: 'Invalid credentials'})
+      res.json({ success: false, message: 'Invalid credentials' });
     }
-
   } catch (error) {
     console.error('Admin login error:', error);
     res.status(500).json({ success: false, message: 'Server error during admin login' });
   }
-}
+};
 
 const getAllUsers = async (req, res) => {
   try {
@@ -120,7 +152,7 @@ const getAllUsers = async (req, res) => {
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ success: false, message: 'Server error fetching users' });
-  } 
-}
+  }
+};
 
-export { registerUser, loginUser, adminLogin, getAllUsers }
+export { registerUser, loginUser, adminLogin, getAllUsers, verifyOTP };
