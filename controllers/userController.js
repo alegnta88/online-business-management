@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate 4-digit OTP
-    const otp = generateOTP(4);
+    const otp = generateOTP(6);
 
     const newUser = new UserModel({
       name,
@@ -51,7 +51,7 @@ const registerUser = async (req, res) => {
     await newUser.save();
 
     // Send OTP via SMS
-    const smsText = `Your verification code is ${otp}`;
+    const smsText = `Dear ${name}, Your verification code is ${otp}, Thank you for choosing Digaf!`;
     const smsSent = await sendSMS(phone, smsText);
 
     if (!smsSent) {
