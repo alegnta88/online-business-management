@@ -5,6 +5,8 @@ import validator from 'validator';
 import { sendSMS } from '../utils/sendSMS.js';
 import { generateOTP } from '../utils/otpGenerator.js';
 
+// register new user
+
 const registerUser = async (req, res) => {
   try {
     const { name, phone, email, password } = req.body;
@@ -51,6 +53,7 @@ const registerUser = async (req, res) => {
     await newUser.save();
 
     // Send OTP via SMS
+
     const smsText = `Dear ${name}, Your verification code is ${otp}, Thank you for choosing Digaf!`;
     const smsSent = await sendSMS(phone, smsText);
 
@@ -68,6 +71,8 @@ const registerUser = async (req, res) => {
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
+
+// verify OTP
 
 const verifyOTP = async (req, res) => {
   try {
@@ -96,6 +101,8 @@ const verifyOTP = async (req, res) => {
     res.status(500).json({ message: 'Server error during OTP verification' });
   }
 };
+
+// login user
 
 const loginUser = async (req, res) => {
   try {
@@ -129,6 +136,9 @@ const loginUser = async (req, res) => {
   }
 };
 
+
+// admin login features
+
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -144,6 +154,8 @@ const adminLogin = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error during admin login' });
   }
 };
+
+// get all users
 
 const getAllUsers = async (req, res) => {
   try {
