@@ -10,6 +10,9 @@ const loginLimiter = rateLimit({
     message: 'Too many login attempts from this IP, please try again after 15 minutes'
 });
 
+
+// user routes
+
 userRouter.get('/', getAllUsers)
 userRouter.post('/register', registerUser)
 userRouter.post('/login', loginLimiter, loginUser)

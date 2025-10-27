@@ -3,7 +3,7 @@ import axios from "axios";
 export const sendSMS = async (phone, message) => {
   try {
     const response = await axios.post(
-      process.env.SMS_API_URL, // e.g., http://196.190.251.17/send
+      process.env.SMS_API_URL,
       {
         to: phone,
         from: process.env.SMS_SENDER_NAME,
@@ -24,3 +24,4 @@ export const sendSMS = async (phone, message) => {
     return false;
   }
 };
+
