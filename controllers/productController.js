@@ -2,12 +2,12 @@ import ProductModel from '../models/productModel.js';
 import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
 
-// Function to create a new product
+// create a new product
 const addProduct = async (req, res) => {
     try {
         const { name, price, description, category, subcategory, sizes, bestseller } = req.body;
 
-        // Validation
+        // product validation 
         if (!name || !price || !description || !category) {
             return res.status(400).json({ 
                 success: false, 
@@ -15,7 +15,7 @@ const addProduct = async (req, res) => {
             });
         }
 
-        // Validate price
+        // Validate price is not less than zero
         if (isNaN(price) || price <= 0) {
             return res.status(400).json({ 
                 success: false, 
