@@ -1,6 +1,7 @@
 import express from 'express';
 import { registerUser, loginUser, adminLogin, getAllUsers } from '../controllers/userController.js';
 import rateLimit from 'express-rate-limit';
+import adminAuth from '../middleware/adminAuth.js';
 
 const userRouter = express.Router();
 
@@ -13,7 +14,7 @@ const loginLimiter = rateLimit({
 
 // user routes
 
-userRouter.get('/', getAllUsers)
+userRouter.get('/', adminAuth, getAllUsers)
 userRouter.post('/register', registerUser)
 userRouter.post('/login', loginLimiter, loginUser)
 userRouter.post('/admin', adminLogin)
