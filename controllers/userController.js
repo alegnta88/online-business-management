@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import validator from 'validator';
 import { sendSMS } from '../utils/sendSMS.js';
 import { generateOTP } from '../utils/otpGenerator.js';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // register new user
 
@@ -139,11 +142,18 @@ const loginUser = async (req, res) => {
 
 // admin login 
 
+
+const isAdmin = (email, password) => {
+  
+  return email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD;
+
+};
+
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+    if (isAdmin(email, password)) {
       const token = jwt.sign(
         { role: 'admin', email: email }, 
         process.env.JWT_SECRET,
