@@ -184,4 +184,26 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, adminLogin, getAllUsers, verifyOTP };
+// get single user
+
+const getSingleUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    console.log(userId);
+
+    const user = await UserModel.findById(userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error('Get user by ID error:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching user' });
+  }
+};
+
+
+export { registerUser, loginUser, adminLogin, getAllUsers, verifyOTP, getSingleUser };
