@@ -6,7 +6,6 @@ import connectCloudinary from './config/cloudinary.js';
 import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
 import productRouter from './routes/productRoute.js';
-import multer from './middleware/multer.js';
 
 dotenv.config();
 
