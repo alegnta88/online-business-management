@@ -50,6 +50,8 @@ export const createProduct = async (data, files) => {
   return await product.save();
 };
 
+// List all products
+
 export const getProducts = async (queryParams) => {
   const limit = parseInt(queryParams.limit) || 5;
   const cursor = queryParams.cursor;
@@ -72,6 +74,8 @@ export const getProducts = async (queryParams) => {
   };
 };
 
+// Delete product
+
 export const deleteProduct = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
 
@@ -87,6 +91,8 @@ export const deleteProduct = async (id) => {
   await ProductModel.findByIdAndDelete(id);
   return true;
 };
+
+// Get product by ID
 
 export const getProductById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
