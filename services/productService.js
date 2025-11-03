@@ -50,25 +50,25 @@ export const createProduct = async (data, files) => {
   return await product.save();
 };
 
-export const getProducts = async (query) => {
-  const { category, bestseller, page = 1, limit = 10 } = query;
+export const getProducts = async (queryParams) => {
+  const limit = parseInt(queryParams.limit) || 5;
+  const cursor = queryParams.cursor;
 
   const filter = {};
-  if (category) filter.category = category;
-  if (bestseller) filter.bestseller = bestseller === 'true';
+  if (queryParams.category) filter.category = queryParams.category;
+  if (queryParams.bestseller) filter.bestseller = queryParams.bestseller === 'true';
 
-  const products = await ProductModel.find(filter)
-    .sort({ date: -1 })
-    .limit(limit * 1)
-    .skip((page - 1) * limit);
+  const cursorQuery = cursor ? { _id: { $gt: cursor } } : {};
 
-  const count = await ProductModel.countDocuments(filter);
+  const products = await ProductModel.find({ ...filter, ...cursorQuery })
+    .sort({ _id: 1 })
+    .limit(limit);
+
+  const nextCursor = products.length ? products[products.length - 1]._id : null;
 
   return {
     products,
-    count,
-    totalPages: Math.ceil(count / limit),
-    currentPage: Number(page),
+    nextCursor,
   };
 };
 
