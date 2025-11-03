@@ -6,12 +6,12 @@ import { generateToken } from '../utils/jwt.js';
 
 // Register user
 export const registerUserService = async ({ name, email, phone, password }) => {
-  // Check if user exists
+
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) throw new Error('User already exists');
 
   const hashedPassword = await hashPassword(password);
-  const otp = generateOTP(6); // generate 6-digit OTP
+  const otp = generateOTP(6); 
 
   const user = new UserModel({
     name,
@@ -39,7 +39,7 @@ export const verifyOTPService = async ({ email, otp }) => {
   if (user.otp !== otp) throw new Error('Invalid OTP');
 
   user.isVerified = true;
-  user.otp = null; // clear OTP after verification
+  user.otp = null;
   await user.save();
 
   const token = generateToken({ id: user._id, email: user.email, role: 'user' });

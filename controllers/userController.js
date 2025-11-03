@@ -60,13 +60,26 @@ export const adminLogin = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await UserModel.find({}, '-password');
+    const limit = parseInt(req.query.limit) || 3; 
+    const cursor = req.query.cursor; 
+
+    const query = cursor ? { _id: { $gt: cursor } } : {};
+
+    const users = await UserModel.find(query)
+      .select('-password') 
+      .sort({ _id: 1 })
+      .limit(limit);
+
+
+    const nextCursor = users.length ? users[users.length - 1]._id : null;
+
     res.json({
       success: true,
-      count: users.length,
-      users
+      users,
+      nextCursor
     });
   } catch (error) {
+    console.error('Error fetching users:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
