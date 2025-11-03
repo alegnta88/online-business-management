@@ -1,6 +1,5 @@
 import { cloudinary, connectCloudinary } from '../config/cloudinary.js';
 
-// Connect to Cloudinary once when the module loads
 connectCloudinary();
 
 // Upload a single image
@@ -17,7 +16,7 @@ export const uploadImage = async (filePath) => {
   }
 };
 
-// Delete image by publicId
+// Delete image by Id
 export const deleteImage = async (imageUrl) => {
   try {
     const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
