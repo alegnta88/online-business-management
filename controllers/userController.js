@@ -1,8 +1,4 @@
-import {
-  registerUserService,
-  verifyOTPService,
-  loginUserService
-} from '../services/userService.js';
+import { registerUserService, verifyOTPService, loginUserService } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
 
