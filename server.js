@@ -3,9 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectToDatabase from './config/env.js';
 import { connectCloudinary } from './config/cloudinary.js';
-import userRouter from './routes/v1/userRoute.js';
+import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
-import productRouter from './routes/v1/productRoute.js';
+import productRouter from './routes/productRoute.js';
 
 dotenv.config();
 
