@@ -6,6 +6,7 @@ import { connectCloudinary } from './config/cloudinary.js';
 import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
 import productRouter from './routes/productRoute.js';
+import paymentRouter from "./routes/paymentRoute.js";
 
 dotenv.config();
 
@@ -22,8 +23,9 @@ app.use(cors());
 app.use(morgan("dev"));
 
 //api endpoints
-app.use('/api/users', userRouter);
-app.use('/api/products', productRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/products', productRouter);
+app.use("/api/v1/payment", paymentRouter);
 
 app.get('/', (req, res) => {
     res.send('E-commerce API is running...');

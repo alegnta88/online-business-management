@@ -4,7 +4,6 @@ import upload from '../middleware/multer.js'
 import adminAuth from '../middleware/adminAuth.js';
 import userAuth from '../middleware/userAuth.js';
 
-
 const productRouter = express.Router();
 
 productRouter.post('/add', adminAuth, upload.single('image'), addProduct);
