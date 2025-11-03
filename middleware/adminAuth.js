@@ -14,7 +14,7 @@ const adminAuth = async (req, res, next) => {
     if (decoded.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Access denied. Admin only.' });
     }
-
+    
     req.admin = decoded;
     next();
   } catch (error) {
