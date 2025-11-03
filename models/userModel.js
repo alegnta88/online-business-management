@@ -7,13 +7,11 @@ const userSchema = new mongoose.Schema(
       required: [true, "Name is required"],
       trim: true,
     },
-
     phone: {
       type: Number,
       required: [true, "Phone is required"],
       trim: true,
     },
-
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -29,6 +27,13 @@ const userSchema = new mongoose.Schema(
     cartData: {
       type: Object,
       default: {},
+    },
+    otp: {
+      type: String,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {

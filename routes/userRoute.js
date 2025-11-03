@@ -1,22 +1,16 @@
 import express from 'express';
-import { registerUser, loginUser, adminLogin, getAllUsers, getSingleUser } from '../controllers/userController.js';
-import rateLimit from 'express-rate-limit';
+import { registerUser, verifyOTP, loginUser, adminLogin, getAllUsers } from '../controllers/userController.js';
 import adminAuth from '../middleware/adminAuth.js';
+
 
 const userRouter = express.Router();
 
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 3, 
-    message: 'Too many login attempts from this IP, please try again after 15 minutes'
-});
 
-// user routes
-
-userRouter.get('/', adminAuth, getAllUsers)
-userRouter.get('/:id', adminAuth, getSingleUser)
-userRouter.post('/register', registerUser)
-userRouter.post('/login', loginLimiter, loginUser)
+userRouter.post('/register', adminAuth, registerUser);
+userRouter.post('/verify', verifyOTP);
+userRouter.post('/login', loginUser);
 userRouter.post('/admin', adminLogin)
+
+userRouter.get('/', adminAuth, getAllUsers);
 
 export default userRouter;

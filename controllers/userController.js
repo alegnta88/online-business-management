@@ -1,6 +1,6 @@
 import { registerUserService, verifyOTPService, loginUserService } from '../services/userService.js';
-import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
+import UserModel from '../models/userModel.js';
 
 export const registerUser = async (req, res) => {
   try {
@@ -16,7 +16,7 @@ export const registerUser = async (req, res) => {
 
 export const verifyOTP = async (req, res) => {
   try {
-    const { token, user } = await verifyOTPService(req.body);
+    const { user, token } = await verifyOTPService(req.body);
     res.json({
       message: 'OTP verified successfully',
       token,
@@ -29,7 +29,7 @@ export const verifyOTP = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { token, user } = await loginUserService(req.body);
+    const { user, token } = await loginUserService(req.body);
     res.json({
       message: 'Login successful',
       token,
@@ -40,34 +40,33 @@ export const loginUser = async (req, res) => {
   }
 };
 
-export const adminLogin = (req, res) => {
+export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
       const token = generateToken({ role: 'admin', email });
-      return res.json({ success: true, token });
+      return res.json({ 
+        success: true, 
+        message: 'Admin login successful',
+        token 
+      });
     }
-    res.status(401).json({ success: false, message: 'Invalid credentials' });
+
+    res.status(401).json({ success: false, message: 'Invalid admin credentials' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export const getAllUsers = async (_, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await UserModel.find({}, '-password');
-    res.json(users);
+    res.json({
+      success: true,
+      count: users.length,
+      users
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const getSingleUser = async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.params.id).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
