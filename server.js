@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectToDatabase from './config/env.js';
-import {connectCloudinary} from './config/cloudinary.js';
+import { connectCloudinary } from './config/cloudinary.js';
 import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
 import productRouter from './routes/productRoute.js';
@@ -34,3 +34,19 @@ app.listen(PORT, () => {
 });
 
 connectToDatabase();
+
+
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.method} ${req.originalUrl} not found`
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
+});
