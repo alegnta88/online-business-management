@@ -1,6 +1,6 @@
 import { registerUserService, verifyOTPService, loginUserService } from '../services/userService.js';
-import { generateToken } from '../utils/jwt.js';
 import UserModel from '../models/userModel.js';
+import { generateToken } from '../utils/jwt.js';
 
 export const registerUser = async (req, res) => {
   try {
@@ -45,6 +45,8 @@ export const adminLogin = async (req, res) => {
     const { email, password } = req.body;
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
       const token = generateToken({ role: 'admin', email });
+
+      console.log('token', token);
       return res.json({ 
         success: true, 
         message: 'Admin login successful',

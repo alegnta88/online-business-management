@@ -1,9 +1,4 @@
-import {
-  createProduct,
-  getProducts,
-  deleteProduct,
-  getProductById
-} from '../services/productService.js';
+import { createProduct, getProducts, deleteProduct, getProductById } from '../services/productService.js';
 
 // Create new product
 export const addProduct = async (req, res) => {
