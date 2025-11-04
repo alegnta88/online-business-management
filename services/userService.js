@@ -42,6 +42,12 @@ export const verifyOTPService = async ({ email, otp }) => {
   user.otp = null;
   await user.save();
 
+  const smsSent = await sendSMS(
+    user.phone,
+    `Dear ${user.name}, your registration is verified successfully.`
+  );
+  if (!smsSent) throw new Error('Failed to send verification SMS.');
+
   const token = generateToken({ id: user._id, email: user.email, role: 'user' });
   return { user, token };
 };
