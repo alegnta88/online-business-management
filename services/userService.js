@@ -5,13 +5,14 @@ import { sendSMS } from '../utils/sendSMS.js';
 import { generateToken } from '../utils/jwt.js';
 
 // Register user
-export const registerUserService = async ({ name, email, phone, password }) => {
-  // Check if user exists
+export const registerUserService = async ({ name, email, phone, password, role }, isAdmin = false) => {
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) throw new Error('User already exists');
 
   const hashedPassword = await hashPassword(password);
-  const otp = generateOTP(6); 
+  const otp = generateOTP(6);
+
+  const userRole = isAdmin ? role || 'user' : 'customer';
 
   const user = new UserModel({
     name,
@@ -19,14 +20,17 @@ export const registerUserService = async ({ name, email, phone, password }) => {
     phone,
     password: hashedPassword,
     otp,
-    isVerified: false,
+    role: userRole,
+    isVerified: isAdmin ? true : false, 
   });
 
   await user.save();
 
-  // Send OTP via SMS
-  const smsSent = await sendSMS(phone, `Dear ${name}, your OTP is ${otp}`);
-  if (!smsSent) throw new Error('Failed to send OTP. Please try again.');
+  // Send OTP 
+  if (!isAdmin) {
+    const smsSent = await sendSMS(phone, `Dear ${name}, your OTP is ${otp}`);
+    if (!smsSent) throw new Error('Failed to send OTP. Please try again.');
+  }
 
   return user;
 };
@@ -48,7 +52,7 @@ export const verifyOTPService = async ({ email, otp }) => {
   );
   if (!smsSent) throw new Error('Failed to send verification SMS.');
 
-  const token = generateToken({ id: user._id, email: user.email, role: 'user' });
+const token = generateToken({ id: user._id, email: user.email, role: user.role });
   return { user, token };
 };
 
@@ -61,6 +65,6 @@ export const loginUserService = async ({ email, password }) => {
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) throw new Error('Invalid credentials');
 
-  const token = generateToken({ id: user._id, email: user.email, role: 'user' });
+  const token = generateToken({ id: user._id, email: user.email, role: user.role });
   return { user, token };
 };
