@@ -63,7 +63,7 @@ export const getProducts = async (queryParams) => {
   const cursorQuery = cursor ? { _id: { $gt: cursor } } : {};
 
   const products = await ProductModel.find({ ...filter, ...cursorQuery })
-    .sort({ _id: 1 })
+    .sort({ _id: -1 })
     .limit(limit);
 
   const nextCursor = products.length ? products[products.length - 1]._id : null;
