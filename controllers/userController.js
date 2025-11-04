@@ -2,55 +2,62 @@ import { registerUserService, verifyOTPService, loginUserService } from '../serv
 import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
 
+// Register a user or customer
 export const registerUser = async (req, res) => {
   try {
-    const user = await registerUserService(req.body);
+    const userData = { ...req.body, role: req.body.role || 'customer' };
+    const user = await registerUserService(userData);
+
     res.status(201).json({
       message: 'User registered successfully. OTP sent.',
-      userId: user._id
+      userId: user._id,
+      role: user.role
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+// Verify OTP
 export const verifyOTP = async (req, res) => {
   try {
     const { user, token } = await verifyOTPService(req.body);
+
     res.json({
       message: 'OTP verified successfully',
       token,
-      user: { id: user._id, name: user.name, email: user.email }
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+// Login for user/customer
 export const loginUser = async (req, res) => {
   try {
     const { user, token } = await loginUserService(req.body);
+
     res.json({
       message: 'Login successful',
       token,
-      user: { id: user._id, name: user.name, email: user.email }
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+// Admin login
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
       const token = generateToken({ role: 'admin', email });
-
-      console.log('token', token);
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         message: 'Admin login successful',
-        token 
+        token
       });
     }
 
@@ -60,18 +67,20 @@ export const adminLogin = async (req, res) => {
   }
 };
 
+// Get all users
 export const getAllUsers = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 3; 
-    const cursor = req.query.cursor; 
+    const limit = parseInt(req.query.limit) || 10;
+    const cursor = req.query.cursor;
+    const roleFilter = req.query.role; 
 
     const query = cursor ? { _id: { $gt: cursor } } : {};
+    if (roleFilter) query.role = roleFilter;
 
     const users = await UserModel.find(query)
-      .select('-password') 
+      .select('-password')
       .sort({ _id: 1 })
       .limit(limit);
-
 
     const nextCursor = users.length ? users[users.length - 1]._id : null;
 

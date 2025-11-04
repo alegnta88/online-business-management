@@ -18,6 +18,7 @@ export const registerUserService = async ({ name, email, phone, password }) => {
     phone,
     password: hashedPassword,
     otp,
+    role: 'customer',
     isVerified: false,
   });
 
@@ -47,7 +48,7 @@ export const verifyOTPService = async ({ email, otp }) => {
   );
   if (!smsSent) throw new Error('Failed to send verification SMS.');
 
-  const token = generateToken({ id: user._id, email: user.email, role: 'user' });
+const token = generateToken({ id: user._id, email: user.email, role: user.role });
   return { user, token };
 };
 
@@ -60,6 +61,6 @@ export const loginUserService = async ({ email, password }) => {
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) throw new Error('Invalid credentials');
 
-  const token = generateToken({ id: user._id, email: user.email, role: 'user' });
+  const token = generateToken({ id: user._id, email: user.email, role: user.role });
   return { user, token };
 };
