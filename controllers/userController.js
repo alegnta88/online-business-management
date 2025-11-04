@@ -5,11 +5,12 @@ import { generateToken } from '../utils/jwt.js';
 // Register a user or customer
 export const registerUser = async (req, res) => {
   try {
-    const userData = { ...req.body, role: req.body.role || 'customer' };
-    const user = await registerUserService(userData);
+    const isAdmin = req.user?.role === 'admin';
+
+    const user = await registerUserService(req.body, isAdmin);
 
     res.status(201).json({
-      message: 'User registered successfully. OTP sent.',
+      message: isAdmin ? 'User created successfully by admin' : 'Customer registered successfully. OTP sent.',
       userId: user._id,
       role: user.role
     });
@@ -92,5 +93,33 @@ export const getAllUsers = async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Customer self-registration
+export const registerCustomer = async (req, res) => {
+  try {
+    const user = await registerUserService(req.body); 
+    res.status(201).json({
+      message: 'Customer registered successfully. OTP sent.',
+      userId: user._id,
+      role: user.role
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Admin creates a new user
+export const registerUserByAdmin = async (req, res) => {
+  try {
+    const user = await registerUserService(req.body, true);
+    res.status(201).json({
+      message: 'User registered successfully by admin.',
+      userId: user._id,
+      role: user.role
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
