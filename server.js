@@ -7,7 +7,7 @@ import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
 import productRouter from './routes/productRoute.js';
 import paymentRouter from "./routes/paymentRoute.js";
-import stripeRouter from "./routes/stripeRoutes.js";
+import stripeRouter from "./routes/stripeRoute.js";
 
 dotenv.config();
 
