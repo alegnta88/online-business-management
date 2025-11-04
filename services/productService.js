@@ -74,6 +74,7 @@ export const getProducts = async (queryParams) => {
   };
 };
 
+
 // Delete product
 
 export const deleteProduct = async (id) => {
