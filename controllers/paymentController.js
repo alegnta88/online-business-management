@@ -1,8 +1,5 @@
 import { validatePaymentInput } from "../validators/paymentValidator.js";
-import {
-  initializePaymentService,
-  verifyPaymentService,
-} from "../services/paymentService.js";
+import { initializePaymentService, verifyPaymentService, } from "../services/paymentService.js";
 
 export const initializePayment = async (req, res) => {
 

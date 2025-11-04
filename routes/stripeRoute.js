@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  createCheckoutSession,
-  verifyPayment,
-} from "../controllers/stripeController.js";
+import { createCheckoutSession, verifyPayment, } from "../controllers/stripeController.js";
 
 const router = express.Router();
 
