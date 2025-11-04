@@ -11,6 +11,6 @@ const productRouter = express.Router();
 productRouter.post('/add', userAuth, upload.single('image'), addProduct);
 productRouter.delete('/remove', userAuth, removeProduct);
 productRouter.post('/single', userAuth, singleProduct);
-productRouter.get('/list', roleAuth(['user', 'customer', 'admin']), listProduct);
+productRouter.get('/list', listProduct);
 
 export default productRouter;
