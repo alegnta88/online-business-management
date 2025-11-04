@@ -6,7 +6,6 @@ import { generateToken } from '../utils/jwt.js';
 
 // Register user
 export const registerUserService = async ({ name, email, phone, password }) => {
-  // Check if user exists
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) throw new Error('User already exists');
 
