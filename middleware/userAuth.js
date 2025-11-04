@@ -1,23 +1,24 @@
 import jwt from 'jsonwebtoken';
 
-const userAuth = (req, res, next) => {
+const userAuth = async (req, res, next) => {
   try {
-    const token =
-      req.headers.authorization?.startsWith('Bearer ')
-        ? req.headers.authorization.split(' ')[1]
-        : req.headers.token;
+    const token = req.headers.authorization?.split(' ')[1] || req.headers.token;
 
     if (!token) {
-      return res.status(401).json({ success: false, message: 'Not authorized. Login required.' });
+      return res.status(401).json({ success: false, message: 'Not authorized. Login again.' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded;
-
+    // Check if the user role is admin
+    if (decoded.role !== 'user') {
+      return res.status(403).json({ success: false, message: 'Access denied. User only.' });
+    }
+    
+    req.admin = decoded;
     next();
   } catch (error) {
-    console.error('User auth error:', error);
+    console.error('user auth error:', error);
     res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 };
