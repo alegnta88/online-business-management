@@ -34,7 +34,7 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
-// Login for user/customer
+// Login 
 export const loginUser = async (req, res) => {
   try {
     const { user, token } = await loginUserService(req.body);
@@ -96,7 +96,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Customer self-registration
+
 export const registerCustomer = async (req, res) => {
   try {
     const user = await registerUserService(req.body); 
