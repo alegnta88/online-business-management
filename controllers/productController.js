@@ -23,8 +23,6 @@ export const addProduct = async (req, res) => {
 export const listProduct = async (req, res) => {
   try {
     const user = req.user;
-    console.log('User in controller:', user); // CHECK THIS
-    console.log('User role:', user?.role); // CHECK THIS
     
     const data = await getProducts(req.query, user);
     res.status(200).json({ success: true, ...data });

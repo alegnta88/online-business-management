@@ -55,11 +55,9 @@ export const createProduct = async (data, files, user) => {
   return await product.save();
 };
 
-// List all products
-// Temporarily add this at the start of getProducts to debug
+// Get products
+
 export const getProducts = async (queryParams, user) => {
-  console.log('User role:', user?.role);
-  console.log('Query params:', queryParams);
   
   const limit = parseInt(queryParams.limit) || 8;
   const cursor = queryParams.cursor;
@@ -69,7 +67,6 @@ export const getProducts = async (queryParams, user) => {
   if (queryParams.category) filter.category = queryParams.category;
   if (queryParams.bestseller) filter.bestseller = queryParams.bestseller === 'true';
 
-  // Handle status filtering
   if (user?.role === 'admin') {
     if (queryParams.status) {
       filter.status = queryParams.status;
@@ -78,16 +75,11 @@ export const getProducts = async (queryParams, user) => {
     filter.status = 'approved';
   }
 
-  console.log('Final filter:', filter); // CHECK THIS OUTPUT
-
   const cursorQuery = cursor ? { _id: { $lt: cursor } } : {};
 
   const products = await ProductModel.find({ ...filter, ...cursorQuery })
     .sort({ _id: -1 })
     .limit(limit + 1);
-
-  console.log('Products found:', products.length);
-  console.log('Product statuses:', products.map(p => ({ name: p.name, status: p.status })));
 
   const hasMore = products.length > limit;
   const resultProducts = hasMore ? products.slice(0, limit) : products;
