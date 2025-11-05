@@ -11,11 +11,15 @@ FROM node:18-alpine AS runtime
 
 WORKDIR /app
 
+RUN mkdir -p /app/uploads
+
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \
     chown -R nodejs:nodejs /app
 
 COPY --from=builder /app ./
+
+RUN chown -R nodejs:nodejs /app
 
 USER nodejs
 
