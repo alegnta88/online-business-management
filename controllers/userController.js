@@ -1,4 +1,4 @@
-import { registerUserService, verifyOTPService, loginUserService } from '../services/userService.js';
+import { registerUserService, verifyOTPService, loginUserService, activateUserById, deactivateUserById } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
 
@@ -121,5 +121,33 @@ export const registerUserByAdmin = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// deactivate user
+export const deactivateUser = async (req, res) => {
+  try {
+    const user = await deactivateUserById(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: 'User deactivated successfully',
+      user,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// activate user
+export const activateUser = async (req, res) => {
+  try {
+    const user = await activateUserById(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: 'User activated successfully',
+      user,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };

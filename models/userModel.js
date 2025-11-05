@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "customer", "admin"],
       default: "customer",
     },
+    isActive: {
+      type: Boolean,
+      default: true, 
+      },
   },
   {
     minimize: false,

@@ -62,9 +62,35 @@ export const loginUserService = async ({ email, password }) => {
   if (!user) throw new Error('User not found');
   if (!user.isVerified) throw new Error('Please verify your account first');
 
+  if (!user.isActive) {
+    throw new Error('Your account has been deactivated. Please contact support.');
+  }
+
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) throw new Error('Invalid credentials');
 
   const token = generateToken({ id: user._id, email: user.email, role: user.role });
   return { user, token };
+};
+
+// deactivate user
+export const deactivateUserById = async (id) => {
+  const user = await UserModel.findById(id);
+  if (!user) throw new Error('User not found');
+
+  user.isActive = false;
+  await user.save();
+
+  return user;
+};
+
+// activate user 
+export const activateUserById = async (id) => {
+  const user = await UserModel.findById(id);
+  if (!user) throw new Error('User not found');
+
+  user.isActive = true;
+  await user.save();
+
+  return user;
 };
