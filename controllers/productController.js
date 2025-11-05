@@ -31,7 +31,6 @@ export const listProduct = async (req, res) => {
   }
 };
 
-
 // Delete product
 export const removeProduct = async (req, res) => {
   try {
