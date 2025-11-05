@@ -35,7 +35,6 @@ export const createProduct = async (data, files, user) => {
     }
   }
 
-  // ✅ Use `user` instead of `req.user`
   const productStatus = user?.role === 'admin' ? 'approved' : 'pending';
 
   const product = new ProductModel({
@@ -95,8 +94,8 @@ export const getProducts = async (queryParams, user) => {
 // Delete product
 
 export const deleteProduct = async (id) => {
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    
     new Error('Invalid product ID');
   }
   const product = await ProductModel.findById(id);
