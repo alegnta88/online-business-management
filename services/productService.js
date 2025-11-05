@@ -103,3 +103,27 @@ export const getProductById = async (id) => {
 
   return product;
 };
+
+export const approveProductById = async (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
+
+  const product = await ProductModel.findById(id);
+  if (!product) throw new Error('Product not found');
+
+  product.status = 'approved';
+  await product.save();
+
+  return product;
+};
+
+export const rejectProductById = async (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
+
+  const product = await ProductModel.findById(id);
+  if (!product) throw new Error('Product not found');
+
+  product.status = 'rejected';
+  await product.save();
+
+  return product;
+};

@@ -30,7 +30,7 @@ app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/stripe", stripeRouter);
 
 app.get('/', (req, res) => {
-    res.send('E-commerce API is running...');
+    res.status(200).send('E-commerce API is running');
 });
 
 app.listen(PORT, () => {
