@@ -2,7 +2,7 @@ import ProductModel from '../models/productModel.js';
 import { uploadImage, deleteImage } from './cloudinaryService.js';
 import mongoose from 'mongoose';
 
-export const createProduct = async (data, files) => {
+export const createProduct = async (data, files, user) => {
   const { name, price, description, category, subcategory, sizes, bestseller } = data;
 
   if (!name || !price || !description || !category) {
@@ -35,6 +35,9 @@ export const createProduct = async (data, files) => {
     }
   }
 
+  // Determine product status based on user role
+  const productStatus = user?.role === 'admin' ? 'approved' : 'pending';
+
   const product = new ProductModel({
     name: name.trim(),
     price: Number(price),
@@ -45,35 +48,49 @@ export const createProduct = async (data, files) => {
     sizes: parsedSizes,
     bestseller: bestseller === 'true' || bestseller === true,
     date: Date.now(),
+    status: productStatus,
+    addedBy: user?._id,
   });
 
   return await product.save();
 };
 
-// List all products
+// Get products
 
-export const getProducts = async (queryParams) => {
-  const limit = parseInt(queryParams.limit) || 5;
+export const getProducts = async (queryParams, user) => {
+  
+  const limit = parseInt(queryParams.limit) || 8;
   const cursor = queryParams.cursor;
 
   const filter = {};
+
   if (queryParams.category) filter.category = queryParams.category;
   if (queryParams.bestseller) filter.bestseller = queryParams.bestseller === 'true';
 
-  const cursorQuery = cursor ? { _id: { $gt: cursor } } : {};
+  if (user?.role === 'admin') {
+    if (queryParams.status) {
+      filter.status = queryParams.status;
+    }
+  } else {
+    filter.status = 'approved';
+  }
+
+  const cursorQuery = cursor ? { _id: { $lt: cursor } } : {};
 
   const products = await ProductModel.find({ ...filter, ...cursorQuery })
     .sort({ _id: -1 })
-    .limit(limit);
+    .limit(limit + 1);
 
-  const nextCursor = products.length ? products[products.length - 1]._id : null;
+  const hasMore = products.length > limit;
+  const resultProducts = hasMore ? products.slice(0, limit) : products;
+  const nextCursor = hasMore ? resultProducts[resultProducts.length - 1]._id : null;
 
   return {
-    products,
+    products: resultProducts,
     nextCursor,
+    hasMore,
   };
 };
-
 
 // Delete product
 
