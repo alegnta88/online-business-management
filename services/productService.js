@@ -35,7 +35,7 @@ export const createProduct = async (data, files, user) => {
     }
   }
 
-  // Determine product status based on user role
+  // ✅ Use `user` instead of `req.user`
   const productStatus = user?.role === 'admin' ? 'approved' : 'pending';
 
   const product = new ProductModel({
@@ -47,9 +47,9 @@ export const createProduct = async (data, files, user) => {
     subcategory: subcategory?.trim() || '',
     sizes: parsedSizes,
     bestseller: bestseller === 'true' || bestseller === true,
-    date: Date.now(),
     status: productStatus,
     addedBy: user?._id,
+    date: Date.now(),
   });
 
   return await product.save();
@@ -137,7 +137,7 @@ export const approveProductById = async (id) => {
 };
 
 export const rejectProductById = async (id) => {
-  
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error('Invalid product ID');
   }

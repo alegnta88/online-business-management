@@ -6,11 +6,12 @@ import userAuth from '../middleware/userAuth.js';
 import customerAuth from '../middleware/customerAuth.js';
 import roleAuth from '../middleware/roleAuth.js';
 import optionalAuth from '../middleware/optionalAuth.js';
+import adminOrUserAuth from '../middleware/adminOrUserAuth.js';
 
 
 const productRouter = express.Router();
 
-productRouter.post('/add', userAuth, upload.single('image'), addProduct);
+productRouter.post('/add', adminOrUserAuth, upload.single('image'), addProduct);
 productRouter.delete('/remove', userAuth, removeProduct);
 productRouter.post('/single', userAuth, singleProduct);
 productRouter.get('/list', optionalAuth, listProduct);
