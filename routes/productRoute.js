@@ -1,5 +1,5 @@
 import express from 'express'
-import { addProduct, listProduct, removeProduct, singleProduct} from '../controllers/productController.js'
+import { addProduct, listProduct, removeProduct, singleProduct, approveProduct, rejectProduct} from '../controllers/productController.js'
 import upload from '../middleware/multer.js'
 import adminAuth from '../middleware/adminAuth.js';
 import userAuth from '../middleware/userAuth.js';
@@ -11,6 +11,9 @@ const productRouter = express.Router();
 productRouter.post('/add', userAuth, upload.single('image'), addProduct);
 productRouter.delete('/remove', userAuth, removeProduct);
 productRouter.post('/single', userAuth, singleProduct);
-productRouter.get('/list', roleAuth(['user', 'customer', 'admin']), listProduct);
+productRouter.get('/list', listProduct);
+
+productRouter.put('/:id/approve', adminAuth, approveProduct);
+productRouter.put('/:id/reject', adminAuth, rejectProduct);
 
 export default productRouter;

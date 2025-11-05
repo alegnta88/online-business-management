@@ -42,7 +42,17 @@ const productSchema = new mongoose.Schema(
       required: [true, "Date is required"],
       default: Date.now,
     },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"], 
+      default: "pending", 
+    },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", 
+    },
   },
+  { timestamps: true }
 );
 
 const ProductModel = mongoose.model("Product", productSchema);
