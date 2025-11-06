@@ -66,23 +66,36 @@ export const loginCustomerService = async ({ email, password }) => {
 };
 
 // Deactivate customer
-export const deactivateCustomerById = async (id) => {
+export const deactivateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
-  if (customer.role !== 'customer') throw new Error('This account is not a customer account!');
 
   customer.isActive = false;
   await customer.save();
+
   return customer;
 };
 
 // Activate customer
-export const activateCustomerById = async (id) => {
+export const activateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
-  if (customer.role !== 'customer') throw new Error('Cannot activate non-customer account');
 
   customer.isActive = true;
   await customer.save();
+
   return customer;
+};
+
+export const getAllCustomersService = async (limit = 10, cursor) => {
+  const query = cursor ? { _id: { $gt: cursor } } : {};
+
+  const customers = await CustomerModel.find(query)
+    .select('-password')
+    .sort({ _id: -1 })
+    .limit(limit);
+
+  const nextCursor = customers.length ? customers[customers.length - 1]._id : null;
+
+  return { customers, nextCursor };
 };
