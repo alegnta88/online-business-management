@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const customerSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     phone: {
-      type: Number,
+      type: String,
       required: [true, "Phone is required"],
       trim: true,
     },
@@ -24,10 +24,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters long"],
     },
-    cartData: {
-      type: Object,
-      default: {},
-    },
     otp: {
       type: String,
     },
@@ -37,20 +33,24 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"], // only user and admin allowed
-      default: "user",
+      enum: ["customer"],
+      default: "customer",
     },
     isActive: {
       type: Boolean,
       default: true,
     },
+    cartData: {
+      type: Object,
+      default: {},
+    },
   },
   {
+    timestamps: true, 
     minimize: false,
-    timestamps: true,
   }
 );
 
-const UserModel = mongoose.model("User", userSchema);
+const CustomerModel = mongoose.model("Customer", customerSchema);
 
-export default UserModel;
+export default CustomerModel;
