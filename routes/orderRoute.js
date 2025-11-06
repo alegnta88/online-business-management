@@ -7,7 +7,7 @@ import customerAuth from '../middleware/customerAuth.js';
 const orderRouter = express.Router();
 
 orderRouter.post('/', customerAuth, createOrder);
-orderRouter.get('/my-orders', userAuth, getMyOrders);
+orderRouter.get('/my-orders', customerAuth, getMyOrders);
 orderRouter.get('/', adminAuth, getAllOrders); 
 orderRouter.put('/:id/status', adminAuth, updateOrderStatus); 
 export default orderRouter;

@@ -1,10 +1,19 @@
-import mongoose from 'mongoose';
+import UserModel from '../models/userModel.js';
 import { createOrderService, getOrdersByCustomerService, getAllOrdersService, updateOrderStatusService } from '../services/orderService.js';
+import { sendSMS } from '../utils/sendSMS.js';
 
 export const createOrder = async (req, res) => {
   try {
     const customerId = req.user.id;
+
+    const customer = await UserModel.findById(customerId);
+    if (!customer) throw new Error('Customer not found');
+
     const order = await createOrderService(customerId, req.body.items, req.body.shippingAddress);
+
+    const message = `Dear ${customer.name}, your order has been placed successfully. Your Total Price is: $${order.totalAmount}`;
+    const smsSent = await sendSMS(customer.phone, message);
+    if (!smsSent) console.warn(`Failed to send SMS to ${customer.phone}`);
 
     res.status(201).json({ 
       success: true, 
@@ -18,7 +27,7 @@ export const createOrder = async (req, res) => {
 
 export const getMyOrders = async (req, res) => {
   try {
-    const orders = await getOrdersByCustomerService(req.user._id);
+    const orders = await getOrdersByCustomerService(req.user.id);
     res.status(200).json({ success: true, orders });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
