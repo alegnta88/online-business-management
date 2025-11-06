@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import productRouter from './routes/productRoute.js';
 import paymentRouter from "./routes/paymentRoute.js";
 import stripeRouter from "./routes/stripeRoute.js";
+import orderRouter from './routes/orderRoute.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
 app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/stripe", stripeRouter);
+app.use("/api/v1/orders", orderRouter);
 
 app.get('/', (req, res) => {
     res.status(200).send('E-commerce API is running');
