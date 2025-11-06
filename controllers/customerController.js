@@ -2,7 +2,7 @@ import CustomerModel from '../models/customerModel.js';
 import { registerCustomerService, verifyCustomerOTPService, loginCustomerService } from '../services/customerService.js';
 import { generateToken } from '../utils/jwt.js';
 
-// new customer registration handler
+// new customer registration
 export const registerCustomer = async (req, res) => {
   try {
     const customer = await registerCustomerService(req.body);

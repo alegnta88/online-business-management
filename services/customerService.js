@@ -33,6 +33,7 @@ export const registerCustomerService = async ({ name, email, phone, password }) 
 
 // Verify OTP for customer
 export const verifyCustomerOTPService = async ({ email, otp }) => {
+
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
   if (customer.isVerified) throw new Error('Customer already verified');
@@ -49,7 +50,6 @@ export const verifyCustomerOTPService = async ({ email, otp }) => {
 
   return { customer, token };
 };
-
 
 // Customer login
 export const loginCustomerService = async ({ email, password }) => {
@@ -69,7 +69,7 @@ export const loginCustomerService = async ({ email, password }) => {
 export const deactivateCustomerById = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
-  if (customer.role !== 'customer') throw new Error('Cannot deactivate non-customer account');
+  if (customer.role !== 'customer') throw new Error('This account is not a customer account!');
 
   customer.isActive = false;
   await customer.save();
