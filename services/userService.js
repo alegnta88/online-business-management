@@ -17,7 +17,7 @@ export const registerUserService = async ({ name, email, phone, password }, isAd
     phone,
     password: hashedPassword,
     role: 'user',
-    isVerified: true, // users created by admin are auto-verified
+    isVerified: true,
   });
 
   await user.save();

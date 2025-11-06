@@ -2,7 +2,7 @@ import CustomerModel from '../models/customerModel.js';
 import { registerCustomerService, verifyCustomerOTPService, loginCustomerService } from '../services/customerService.js';
 import { generateToken } from '../utils/jwt.js';
 
-// Register a customer
+// new customer registration handler
 export const registerCustomer = async (req, res) => {
   try {
     const customer = await registerCustomerService(req.body);
@@ -68,6 +68,37 @@ export const getAllCustomers = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching customers:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deactivateCustomer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const customer = await CustomerModel.findById(id);
+    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+
+    customer.isActive = false;
+    await customer.save();
+
+    res.status(200).json({ success: true, message: 'Customer deactivated successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Activate customer
+export const activateCustomer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const customer = await CustomerModel.findById(id);
+    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+
+    customer.isActive = true;
+    await customer.save();
+
+    res.status(200).json({ success: true, message: 'Customer activated successfully' });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };

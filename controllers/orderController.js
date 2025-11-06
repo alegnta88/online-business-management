@@ -1,6 +1,7 @@
 import UserModel from '../models/userModel.js';
 import { createOrderService, getOrdersByCustomerService, getAllOrdersService, updateOrderStatusService } from '../services/orderService.js';
 import { sendSMS } from '../utils/sendSMS.js';
+import OrderModel from '../models/orderModel.js';
 
 export const createOrder = async (req, res) => {
   try {
@@ -10,8 +11,6 @@ export const createOrder = async (req, res) => {
     if (!customer) throw new Error('Customer not found');
 
     const order = await createOrderService(customerId, req.body.items, req.body.shippingAddress);
-
-    // send sms notification for customers for new orders
 
     const message = `Dear ${customer.name}, your order has been placed successfully. Your Total Price is: $${order.totalAmount}`;
     const smsSent = await sendSMS(customer.phone, message);
@@ -45,11 +44,9 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-import OrderModel from '../models/orderModel.js';
-
 export const updateOrderStatus = async (req, res) => {
   try {
-    const user = req.user; // from adminOrUserAuth
+    const user = req.user;
     const orderId = req.params.id;
     const newStatus = req.body.status;
 
