@@ -11,6 +11,8 @@ export const createOrder = async (req, res) => {
 
     const order = await createOrderService(customerId, req.body.items, req.body.shippingAddress);
 
+    // send sms notification for customers for new orders
+    
     const message = `Dear ${customer.name}, your order has been placed successfully. Your Total Price is: $${order.totalAmount}`;
     const smsSent = await sendSMS(customer.phone, message);
     if (!smsSent) console.warn(`Failed to send SMS to ${customer.phone}`);
