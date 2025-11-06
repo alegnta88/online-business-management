@@ -15,7 +15,7 @@ const customerAuth = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Access denied. Customer only.' });
     }
     
-    req.admin = decoded;
+    req.user = decoded;
     next();
   } catch (error) {
     console.error('Customer auth error:', error);

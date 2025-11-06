@@ -1,9 +1,16 @@
+import mongoose from 'mongoose';
 import { createOrderService, getOrdersByCustomerService, getAllOrdersService, updateOrderStatusService } from '../services/orderService.js';
 
 export const createOrder = async (req, res) => {
   try {
-    const order = await createOrderService(req.user._id, req.body.items, req.body.shippingAddress);
-    res.status(201).json({ success: true, message: 'Order placed successfully', order });
+    const customerId = req.user.id;
+    const order = await createOrderService(customerId, req.body.items, req.body.shippingAddress);
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Order placed successfully', 
+      order 
+    });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
