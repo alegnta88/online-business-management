@@ -6,8 +6,8 @@ import { connectCloudinary } from './config/cloudinary.js';
 import userRouter from './routes/userRoute.js';
 import morgan from 'morgan';
 import productRouter from './routes/productRoute.js';
-import paymentRouter from "./routes/paymentRoute.js";
-import stripeRouter from "./routes/stripeRoute.js";
+import paymentRouter from './routes/paymentRoute.js';
+import stripeRouter from './routes/stripeRoute.js';
 import orderRouter from './routes/orderRoute.js';
 import customerRouter from './routes/customerRoute.js';
 
@@ -36,7 +36,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/customers', customerRouter);
 
 app.get('/', (req, res) => {
-    res.status(200).send('E-commerce API is running');
+    res.status(200).send('App is running');
 });
 
 app.listen(PORT, () => {
