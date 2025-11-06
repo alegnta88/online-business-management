@@ -2,12 +2,13 @@ import UserModel from '../models/userModel.js';
 import { createOrderService, getOrdersByCustomerService, getAllOrdersService, updateOrderStatusService } from '../services/orderService.js';
 import { sendSMS } from '../utils/sendSMS.js';
 import OrderModel from '../models/orderModel.js';
+import CustomerModel from '../models/customerModel.js';
 
 export const createOrder = async (req, res) => {
   try {
     const customerId = req.user.id;
 
-    const customer = await UserModel.findById(customerId);
+    const customer = await CustomerModel.findById(customerId);
     if (!customer) throw new Error('Customer not found');
 
     const order = await createOrderService(customerId, req.body.items, req.body.shippingAddress);

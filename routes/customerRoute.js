@@ -8,7 +8,7 @@ customerRouter.post('/register', registerCustomer);
 customerRouter.post('/verify', verifyOTP);
 customerRouter.post('/login', loginCustomer);
 
-customerRouter.get('/all', adminAuth, getAllCustomers);
+customerRouter.get('/', adminAuth, getAllCustomers);
 customerRouter.put('/:id/deactivate', adminAuth, deactivateCustomer);
 customerRouter.put('/:id/activate', adminAuth, activateCustomer);
 
