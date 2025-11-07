@@ -8,7 +8,6 @@ import {
 } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
-import { sendEmail } from '../utils/sendEmail.js';
 
 
 // Register a new user
@@ -57,22 +56,18 @@ export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      const otp = createAdminOTP(email);
+    await createAdminOTP(email, password);
 
-      const emailSent = await sendEmail(email, 'Your Admin OTP', `Your OTP is: ${otp}`);
-      if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
-
-      return res.json({
-        success: true,
-        message: 'OTP sent to your email. Verify to complete login.'
-      });
-    }
-
-    res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    res.json({
+      success: true,
+      message: 'OTP sent to your email. Verify to complete login.'
+    });
 
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.message === 'Invalid admin credentials' ? 401 : 500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 

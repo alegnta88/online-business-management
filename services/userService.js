@@ -2,6 +2,8 @@ import UserModel from '../models/userModel.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { generateToken } from '../utils/jwt.js';
 import { generateOTP } from '../utils/otpGenerator.js';
+import { sendEmail } from '../utils/sendEmail.js';
+
 const adminOtpStore = {};
 
 // Register a new user
@@ -64,21 +66,35 @@ export const activateUserById = async (id) => {
 };
 
 
-export const createAdminOTP = (email) => {
-  const otp = generateOTP(6); 
+export const createAdminOTP = async (email, password) => {
+  if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
+    console.log('Invalid admin login attempt for email:', email);
+    console.log('Provided password:', password);
+    throw new Error('Invalid admin credentials');
+  }
+
+  const otp = generateOTP();
+
   adminOtpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+
+  const emailSent = await sendEmail(email, 'Your Admin OTP', `Your OTP is: ${otp}`);
+  if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
+
   return otp;
 };
 
-// Verify admin OTP
 export const verifyAdminOTP = (email, otp) => {
   const stored = adminOtpStore[email];
   if (!stored) throw new Error('OTP not found. Please login first.');
+
   if (Date.now() > stored.expires) {
     delete adminOtpStore[email];
     throw new Error('OTP expired. Please login again.');
   }
+
   if (otp !== stored.otp) throw new Error('Invalid OTP');
+
   delete adminOtpStore[email];
+
   return generateToken({ role: 'admin', email });
 };
