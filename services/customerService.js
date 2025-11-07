@@ -69,6 +69,7 @@ export const loginCustomerService = async ({ email, password }) => {
 export const deactivateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
+  if( !customer.isActive) throw new Error('Customer is already deactivated');
 
   customer.isActive = false;
   await customer.save();
@@ -80,6 +81,7 @@ export const deactivateCustomerService = async (id) => {
 export const activateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
+  if( customer.isActive) throw new Error('Customer is already active');
 
   customer.isActive = true;
   await customer.save();
