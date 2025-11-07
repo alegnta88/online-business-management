@@ -160,3 +160,44 @@ export const getAllCustomersService = async (limit = 10, cursor) => {
   const nextCursor = customers.length ? customers[customers.length - 1]._id : null;
   return { customers, nextCursor };
 };
+
+
+export const requestPasswordResetService = async (email) => {
+  const customer = await CustomerModel.findOne({ email });
+  if (!customer) throw new Error('Customer not found');
+
+  const otp = generateOTP(6);
+  customer.resetPasswordOTP = otp;
+  customer.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await customer.save();
+
+  const smsSent = await sendSMS(customer.phone, `Dear ${customer.name}, your password reset code is ${otp}`);
+  if (!smsSent) throw new Error('Failed to send reset code. Please try again.');
+
+  return { message: 'Password reset OTP sent successfully.' };
+};
+
+// Reset password
+export const resetPasswordService = async ({ email, otp, newPassword }) => {
+  const customer = await CustomerModel.findOne({ email });
+  if (!customer) throw new Error('Customer not found');
+
+  if (!customer.resetPasswordOTP || customer.resetPasswordOTP !== otp) {
+    throw new Error('Invalid or expired OTP.');
+  }
+
+  if (customer.resetPasswordExpires < Date.now()) {
+    throw new Error('OTP has expired.');
+  }
+
+  customer.password = await hashPassword(newPassword);
+  customer.resetPasswordOTP = null;
+  customer.resetPasswordExpires = null;
+
+  await customer.save();
+
+  const smsSent = await sendSMS(customer.phone, `Dear ${customer.name}, your password has been reset successfully.`);
+  if (!smsSent) throw new Error('Password reset, but failed to send confirmation SMS.');
+
+  return { message: 'Password reset successful.' };
+};
