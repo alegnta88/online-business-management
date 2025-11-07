@@ -1,10 +1,22 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { registerCustomer, verifyOTP, loginCustomer, getAllCustomers, deactivateCustomer, activateCustomer } from '../controllers/customerController.js';
+import { 
+  registerCustomer, 
+  verifyOTP, 
+  loginCustomer, 
+  verify2FALogin,       
+  enable2FA,            
+  verifyEnable2FA,      
+  getAllCustomers, 
+  deactivateCustomer, 
+  activateCustomer 
+} from '../controllers/customerController.js';
 import adminAuth from '../middleware/adminAuth.js';
+import userAuth from '../middleware/userAuth.js';
+import customerAuth from '../middleware/customerAuth.js';
 
 const loginLimiter = rateLimit({
-  windowMs: 2 * 60 * 1000,
+  windowMs: 2 * 60 * 1000, 
   max: 3, 
   message: {
     success: false,
@@ -18,7 +30,13 @@ const customerRouter = express.Router();
 
 customerRouter.post('/register', registerCustomer);
 customerRouter.post('/verify', verifyOTP);
-customerRouter.post('/login', loginLimiter, loginCustomer);
+
+
+customerRouter.post('/login', loginLimiter, loginCustomer);  
+customerRouter.post('/login/verify', verify2FALogin);       
+
+customerRouter.post('/2fa/enable', customerAuth, enable2FA);          
+customerRouter.post('/2fa/verify', customerAuth, verifyEnable2FA);    
 
 customerRouter.get('/', adminAuth, getAllCustomers);
 customerRouter.put('/:id/deactivate', adminAuth, deactivateCustomer);
