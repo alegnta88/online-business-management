@@ -1,8 +1,10 @@
 import UserModel from '../models/userModel.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { generateToken } from '../utils/jwt.js';
+import { generateOTP } from '../utils/otpGenerator.js';
+const adminOtpStore = {};
 
-// Register a new user (admin only)
+// Register a new user
 export const registerUserService = async ({ name, email, phone, password }, isAdmin = false) => {
   if (!isAdmin) throw new Error('Only admin can create users');
 
@@ -59,4 +61,24 @@ export const activateUserById = async (id) => {
   user.isActive = true;
   await user.save();
   return user;
+};
+
+
+export const createAdminOTP = (email) => {
+  const otp = generateOTP(6); 
+  adminOtpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+  return otp;
+};
+
+// Verify admin OTP
+export const verifyAdminOTP = (email, otp) => {
+  const stored = adminOtpStore[email];
+  if (!stored) throw new Error('OTP not found. Please login first.');
+  if (Date.now() > stored.expires) {
+    delete adminOtpStore[email];
+    throw new Error('OTP expired. Please login again.');
+  }
+  if (otp !== stored.otp) throw new Error('Invalid OTP');
+  delete adminOtpStore[email];
+  return generateToken({ role: 'admin', email });
 };

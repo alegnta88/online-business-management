@@ -25,8 +25,11 @@
     "mongoose": "^8.19.2",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
     "nodemon": "^3.1.10",
+    "qrcode": "^1.5.4",
     "razorpay": "^2.9.6",
+    "speakeasy": "^2.0.0",
     "stripe": "^19.2.0",
     "validator": "^13.15.15"
   }
