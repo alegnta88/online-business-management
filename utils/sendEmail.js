@@ -13,7 +13,7 @@ export const sendEmail = async (to, subject, text) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"Admin OTP" <${process.env.EMAIL_USER}>`,
+      from: `"Verify Your Login" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text,
