@@ -77,7 +77,11 @@ export const createAdminOTP = async (email, password) => {
 
   adminOtpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
 
-  const emailSent = await sendEmail(email, 'Your Admin OTP', `Your OTP is: ${otp}`);
+  const emailSent = await sendEmail(
+  email,
+  'Admin Login OTP',
+  `Use this code to finish your login: ${otp}`
+);
   if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
 
   return otp;
