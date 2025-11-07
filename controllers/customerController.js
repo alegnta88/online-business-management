@@ -62,7 +62,6 @@ export const verify2FALogin = async (req, res) => {
   }
 };
 
-// Enable 2FA (send OTP)
 export const enable2FA = async (req, res) => {
   try {
     const result = await enable2FAService(req.user.id);
@@ -95,7 +94,6 @@ export const getAllCustomers = async (req, res) => {
   }
 };
 
-// Activate / Deactivate
 export const deactivateCustomer = async (req, res) => {
   try {
     const customer = await deactivateCustomerService(req.params.id);
