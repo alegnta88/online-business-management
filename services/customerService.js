@@ -4,12 +4,10 @@ import { generateOTP } from '../utils/otpGenerator.js';
 import { sendSMS } from '../utils/sendSMS.js';
 import { generateToken } from '../utils/jwt.js';
 
-// Helper: check OTP expiry
 const isOTPExpired = (expiresAt) => {
   return new Date() > new Date(expiresAt);
 };
 
-// Register a new customer
 export const registerCustomerService = async ({ name, email, phone, password }) => {
   const existingCustomer = await CustomerModel.findOne({ email });
   if (existingCustomer) throw new Error('Customer already exists');
@@ -17,7 +15,7 @@ export const registerCustomerService = async ({ name, email, phone, password }) 
   const hashedPassword = await hashPassword(password);
   const otp = generateOTP(6);
 
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
 
   const customer = new CustomerModel({
     name,
@@ -39,7 +37,6 @@ export const registerCustomerService = async ({ name, email, phone, password }) 
   return customer;
 };
 
-// Verify registration OTP
 export const verifyCustomerOTPService = async ({ email, otp }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
@@ -59,7 +56,7 @@ export const verifyCustomerOTPService = async ({ email, otp }) => {
   return { customer, token };
 };
 
-// Step 1: Login (verify password & send OTP)
+
 export const loginCustomerService = async ({ email, password }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
@@ -69,7 +66,6 @@ export const loginCustomerService = async ({ email, password }) => {
   const isMatch = await comparePassword(password, customer.password);
   if (!isMatch) throw new Error('Invalid credentials');
 
-  // Generate OTP for login 2FA
   const otp = generateOTP(6);
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -82,7 +78,7 @@ export const loginCustomerService = async ({ email, password }) => {
   return { message: 'OTP sent to your registered phone number', email: customer.email };
 };
 
-// Step 2: Verify 2FA OTP for login
+// Verify 2FA OTP for login
 export const verify2FALoginService = async ({ email, otp }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
@@ -97,7 +93,6 @@ export const verify2FALoginService = async ({ email, otp }) => {
 
   return { customer, token };
 };
-
 
 export const enable2FAService = async (customerId) => {
   const customer = await CustomerModel.findById(customerId);
@@ -115,7 +110,6 @@ export const enable2FAService = async (customerId) => {
 
   return { message: 'OTP sent to your phone for 2FA activation.' };
 };
-
 
 export const verifyEnable2FAService = async ({ customerId, otp }) => {
   const customer = await CustomerModel.findById(customerId);
@@ -165,4 +159,45 @@ export const getAllCustomersService = async (limit = 10, cursor) => {
 
   const nextCursor = customers.length ? customers[customers.length - 1]._id : null;
   return { customers, nextCursor };
+};
+
+
+export const requestPasswordResetService = async (email) => {
+  const customer = await CustomerModel.findOne({ email });
+  if (!customer) throw new Error('Customer not found');
+
+  const otp = generateOTP(6);
+  customer.resetPasswordOTP = otp;
+  customer.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await customer.save();
+
+  const smsSent = await sendSMS(customer.phone, `Dear ${customer.name}, your password reset code is ${otp}`);
+  if (!smsSent) throw new Error('Failed to send reset code. Please try again.');
+
+  return { message: 'Password reset OTP sent successfully.' };
+};
+
+// Reset password
+export const resetPasswordService = async ({ email, otp, newPassword }) => {
+  const customer = await CustomerModel.findOne({ email });
+  if (!customer) throw new Error('Customer not found');
+
+  if (!customer.resetPasswordOTP || customer.resetPasswordOTP !== otp) {
+    throw new Error('Invalid or expired OTP.');
+  }
+
+  if (customer.resetPasswordExpires < Date.now()) {
+    throw new Error('OTP has expired.');
+  }
+
+  customer.password = await hashPassword(newPassword);
+  customer.resetPasswordOTP = null;
+  customer.resetPasswordExpires = null;
+
+  await customer.save();
+
+  const smsSent = await sendSMS(customer.phone, `Dear ${customer.name}, your password has been reset successfully.`);
+  if (!smsSent) throw new Error('Password reset, but failed to send confirmation SMS.');
+
+  return { message: 'Password reset successful.' };
 };

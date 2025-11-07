@@ -8,6 +8,8 @@ import {
   getAllCustomersService,
   activateCustomerService,
   deactivateCustomerService,
+  requestPasswordResetService,
+  resetPasswordService,
 } from '../services/customerService.js';
 
 // Register new customer
@@ -62,7 +64,6 @@ export const verify2FALogin = async (req, res) => {
   }
 };
 
-// Enable 2FA (send OTP)
 export const enable2FA = async (req, res) => {
   try {
     const result = await enable2FAService(req.user.id);
@@ -95,7 +96,6 @@ export const getAllCustomers = async (req, res) => {
   }
 };
 
-// Activate / Deactivate
 export const deactivateCustomer = async (req, res) => {
   try {
     const customer = await deactivateCustomerService(req.params.id);
@@ -119,5 +119,24 @@ export const activateCustomer = async (req, res) => {
     });
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });
+  }
+};
+
+export const requestPasswordReset = async (req, res) => {
+  try {
+    const result = await requestPasswordResetService(req.body.email);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Reset password
+export const resetPassword = async (req, res) => {
+  try {
+    const result = await resetPasswordService(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
