@@ -1,8 +1,13 @@
-import CustomerModel from '../models/customerModel.js'; 
+import CustomerModel from '../models/customerModel.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { generateOTP } from '../utils/otpGenerator.js';
 import { sendSMS } from '../utils/sendSMS.js';
 import { generateToken } from '../utils/jwt.js';
+
+// Helper: check OTP expiry
+const isOTPExpired = (expiresAt) => {
+  return new Date() > new Date(expiresAt);
+};
 
 // Register a new customer
 export const registerCustomerService = async ({ name, email, phone, password }) => {
@@ -12,46 +17,49 @@ export const registerCustomerService = async ({ name, email, phone, password }) 
   const hashedPassword = await hashPassword(password);
   const otp = generateOTP(6);
 
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry
+
   const customer = new CustomerModel({
     name,
     email,
     phone,
     password: hashedPassword,
     otp,
+    otpExpiresAt: expiresAt,
     role: 'customer',
-    isVerified: false, 
+    isVerified: false,
+    twoFAEnabled: false,
   });
 
   await customer.save();
 
-  // Send OTP via SMS
-  const smsSent = await sendSMS(phone, `Dear ${name}, your OTP is ${otp}`);
+  const smsSent = await sendSMS(phone, `Dear ${name}, your registration OTP is ${otp}`);
   if (!smsSent) throw new Error('Failed to send OTP. Please try again.');
 
   return customer;
 };
 
-// Verify OTP for customer
+// Verify registration OTP
 export const verifyCustomerOTPService = async ({ email, otp }) => {
-
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
   if (customer.isVerified) throw new Error('Customer already verified');
+  if (isOTPExpired(customer.otpExpiresAt)) throw new Error('OTP expired');
   if (customer.otp !== otp) throw new Error('Invalid OTP');
 
   customer.isVerified = true;
   customer.otp = null;
+  customer.otpExpiresAt = null;
   await customer.save();
 
   const token = generateToken({ id: customer._id, email: customer.email, role: customer.role });
 
-  const smsSent = await sendSMS(customer.phone, `Dear ${customer.name}, your registration is verified successfully.`);
-  if (!smsSent) throw new Error('Failed to send verification SMS.');
+  await sendSMS(customer.phone, `Dear ${customer.name}, your registration is verified successfully.`);
 
   return { customer, token };
 };
 
-// Customer login
+// Step 1: Login (verify password & send OTP)
 export const loginCustomerService = async ({ email, password }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
@@ -61,15 +69,73 @@ export const loginCustomerService = async ({ email, password }) => {
   const isMatch = await comparePassword(password, customer.password);
   if (!isMatch) throw new Error('Invalid credentials');
 
+  // Generate OTP for login 2FA
+  const otp = generateOTP(6);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  customer.otp = otp;
+  customer.otpExpiresAt = expiresAt;
+  await customer.save();
+
+  await sendSMS(customer.phone, `Dear ${customer.name}, your login OTP is ${otp}`);
+
+  return { message: 'OTP sent to your registered phone number', email: customer.email };
+};
+
+// Step 2: Verify 2FA OTP for login
+export const verify2FALoginService = async ({ email, otp }) => {
+  const customer = await CustomerModel.findOne({ email });
+  if (!customer) throw new Error('Customer not found');
+  if (isOTPExpired(customer.otpExpiresAt)) throw new Error('OTP expired');
+  if (customer.otp !== otp) throw new Error('Invalid OTP');
+
+  customer.otp = null;
+  customer.otpExpiresAt = null;
+  await customer.save();
+
   const token = generateToken({ id: customer._id, email: customer.email, role: customer.role });
+
   return { customer, token };
+};
+
+
+export const enable2FAService = async (customerId) => {
+  const customer = await CustomerModel.findById(customerId);
+  if (!customer) throw new Error('Customer not found');
+  if (customer.twoFAEnabled) throw new Error('2FA is already enabled.');
+
+  const otp = generateOTP(6);
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  customer.otp = otp;
+  customer.otpExpiresAt = expiresAt;
+  await customer.save();
+
+  await sendSMS(customer.phone, `Your 2FA activation code is ${otp}`);
+
+  return { message: 'OTP sent to your phone for 2FA activation.' };
+};
+
+
+export const verifyEnable2FAService = async ({ customerId, otp }) => {
+  const customer = await CustomerModel.findById(customerId);
+  if (!customer) throw new Error('Customer not found');
+  if (isOTPExpired(customer.otpExpiresAt)) throw new Error('OTP expired');
+  if (customer.otp !== otp) throw new Error('Invalid OTP');
+
+  customer.twoFAEnabled = true;
+  customer.otp = null;
+  customer.otpExpiresAt = null;
+  await customer.save();
+
+  return { message: '2FA enabled successfully.' };
 };
 
 // Deactivate customer
 export const deactivateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
-  if( !customer.isActive) throw new Error('Customer is already deactivated');
+  if (!customer.isActive) throw new Error('Customer already deactivated');
 
   customer.isActive = false;
   await customer.save();
@@ -81,7 +147,7 @@ export const deactivateCustomerService = async (id) => {
 export const activateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
-  if( customer.isActive) throw new Error('Customer is already active');
+  if (customer.isActive) throw new Error('Customer already active');
 
   customer.isActive = true;
   await customer.save();
@@ -89,15 +155,14 @@ export const activateCustomerService = async (id) => {
   return customer;
 };
 
+// Get all customers
 export const getAllCustomersService = async (limit = 10, cursor) => {
   const query = cursor ? { _id: { $gt: cursor } } : {};
-
   const customers = await CustomerModel.find(query)
     .select('-password')
     .sort({ _id: -1 })
     .limit(limit);
 
   const nextCursor = customers.length ? customers[customers.length - 1]._id : null;
-
   return { customers, nextCursor };
 };

@@ -32,7 +32,6 @@ app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/stripe", stripeRouter);
 app.use("/api/v1/orders", orderRouter);
 
-app.use('/api/v1/users', userRouter);
 app.use('/api/v1/customers', customerRouter);
 
 app.get('/', (req, res) => {
