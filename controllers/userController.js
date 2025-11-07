@@ -2,12 +2,16 @@ import {
   registerUserService, 
   loginUserService, 
   activateUserById, 
-  deactivateUserById 
+  deactivateUserById,
+  createAdminOTP,
+  verifyAdminOTP
 } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
-// Register a new user (admin only)
+
+// Register a new user
 export const registerUserByAdmin = async (req, res) => {
   try {
     const user = await registerUserService({ ...req.body, role: 'user' }, true);
@@ -21,7 +25,7 @@ export const registerUserByAdmin = async (req, res) => {
   }
 };
 
-// Get all users (admin only)
+// Get all users 
 export const getAllUsers = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
@@ -52,17 +56,41 @@ export const getAllUsers = async (req, res) => {
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      const token = generateToken({ role: 'admin', email });
+      const otp = createAdminOTP(email);
+
+      const emailSent = await sendEmail(email, 'Your Admin OTP', `Your OTP is: ${otp}`);
+      if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
+
       return res.json({
         success: true,
-        message: 'Admin login successful',
-        token
+        message: 'OTP sent to your email. Verify to complete login.'
       });
     }
+
     res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Admin verify OTP
+export const adminVerifyOTPController = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const token = verifyAdminOTP(email, otp);
+
+    res.json({
+      success: true,
+      message: 'Admin login successful',
+      token
+    });
+
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
