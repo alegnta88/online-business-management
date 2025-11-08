@@ -26,7 +26,7 @@ export const registerCustomerService = async ({ name, email, phone, password }) 
     otpExpiresAt: expiresAt,
     role: 'customer',
     isVerified: false,
-    twoFAEnabled: false,
+    twoFactorEnabled: false,
   });
 
   await customer.save();
@@ -65,18 +65,40 @@ export const loginCustomerService = async ({ email, password }) => {
 
   const isMatch = await comparePassword(password, customer.password);
   if (!isMatch) throw new Error('Invalid credentials');
+ 
+  if (customer.twoFactorEnabled) {
+    const otp = generateOTP(6);
+    customer.twoFactorCode = otp;
+    customer.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); 
 
-  const otp = generateOTP(6);
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    await sendSMS(customer.phone, `Dear ${customer.name}, your login OTP is ${otp}`);
 
-  customer.otp = otp;
-  customer.otpExpiresAt = expiresAt;
-  await customer.save();
+    return {
+      message: '2FA enabled. Please verify OTP sent to your phone.',
+      requires2FA: true,
+      customerId: customer._id,
+    };
+  }
 
-  await sendSMS(customer.phone, `Dear ${customer.name}, your login OTP is ${otp}`);
+  const token = generateToken({
+    id: customer._id,
+    email: customer.email,
+    role: customer.role,
+  });
 
-  return { message: 'OTP sent to your registered phone number', email: customer.email };
+  return {
+    message: 'Login successful',
+    requires2FA: false,
+    token,
+    customer: {
+      id: customer._id,
+      name: customer.name,
+      email: customer.email,
+    },
+  };
 };
+
+
 
 // Verify 2FA OTP for login
 export const verify2FALoginService = async ({ email, otp }) => {
@@ -97,7 +119,7 @@ export const verify2FALoginService = async ({ email, otp }) => {
 export const enable2FAService = async (customerId) => {
   const customer = await CustomerModel.findById(customerId);
   if (!customer) throw new Error('Customer not found');
-  if (customer.twoFAEnabled) throw new Error('2FA is already enabled.');
+  if (customer.twoFactorEnabled) throw new Error('2FA is already enabled.');
 
   const otp = generateOTP(6);
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -117,7 +139,7 @@ export const verifyEnable2FAService = async ({ customerId, otp }) => {
   if (isOTPExpired(customer.otpExpiresAt)) throw new Error('OTP expired');
   if (customer.otp !== otp) throw new Error('Invalid OTP');
 
-  customer.twoFAEnabled = true;
+  customer.twoFactorEnabled = true;
   customer.otp = null;
   customer.otpExpiresAt = null;
   await customer.save();

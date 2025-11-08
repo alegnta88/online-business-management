@@ -8,7 +8,6 @@ import roleAuth from '../middleware/roleAuth.js';
 import optionalAuth from '../middleware/optionalAuth.js';
 import adminOrUserAuth from '../middleware/adminOrUserAuth.js';
 
-
 const productRouter = express.Router();
 
 productRouter.post('/add', adminOrUserAuth, upload.single('image'), addProduct);
