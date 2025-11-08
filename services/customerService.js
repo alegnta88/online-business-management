@@ -65,11 +65,13 @@ export const loginCustomerService = async ({ email, password }) => {
 
   const isMatch = await comparePassword(password, customer.password);
   if (!isMatch) throw new Error('Invalid credentials');
- 
+
   if (customer.twoFactorEnabled) {
     const otp = generateOTP(6);
     customer.twoFactorCode = otp;
-    customer.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+    customer.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await customer.save();
 
     await sendSMS(customer.phone, `Dear ${customer.name}, your login OTP is ${otp}`);
 
@@ -77,6 +79,7 @@ export const loginCustomerService = async ({ email, password }) => {
       message: '2FA enabled. Please verify OTP sent to your phone.',
       requires2FA: true,
       customerId: customer._id,
+      email: customer.email, 
     };
   }
 
@@ -99,15 +102,15 @@ export const loginCustomerService = async ({ email, password }) => {
 };
 
 
-
 // Verify 2FA OTP for login
 export const verify2FALoginService = async ({ email, otp }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
+  if (!customer.twoFactorEnabled) throw new Error('2FA not enabled');
   if (isOTPExpired(customer.otpExpiresAt)) throw new Error('OTP expired');
-  if (customer.otp !== otp) throw new Error('Invalid OTP');
+  if (customer.twoFactorCode !== otp) throw new Error('Invalid OTP');
 
-  customer.otp = null;
+  customer.twoFactorCode = null;
   customer.otpExpiresAt = null;
   await customer.save();
 
@@ -187,6 +190,7 @@ export const getAllCustomersService = async (limit = 10, cursor) => {
 export const requestPasswordResetService = async (email) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
+  if (!customer.isActive) throw new Error('Your account is deactivated. Contact support.');
 
   const otp = generateOTP(6);
   customer.resetPasswordOTP = otp;
