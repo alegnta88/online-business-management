@@ -3,6 +3,7 @@ import { hashPassword, comparePassword } from '../utils/password.js';
 import { generateOTP } from '../utils/otpGenerator.js';
 import { sendSMS } from '../utils/sendSMS.js';
 import { generateToken } from '../utils/jwt.js';
+import redisClient from '../config/redis.js';
 
 const isOTPExpired = (expiresAt) => {
   return new Date() > new Date(expiresAt);
@@ -60,27 +61,20 @@ export const verifyCustomerOTPService = async ({ email, otp }) => {
 export const loginCustomerService = async ({ email, password }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
-  if (!customer.isVerified) throw new Error('Please verify your account first');
-  if (!customer.isActive) throw new Error('Your account has been deactivated. Contact support.');
 
   const isMatch = await comparePassword(password, customer.password);
   if (!isMatch) throw new Error('Invalid credentials');
 
+  if (!customer.isActive) throw new Error('Account is deactivated');
+
   if (customer.twoFactorEnabled) {
-    const otp = generateOTP(6);
-    customer.twoFactorCode = otp;
-    customer.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    const otp = generateOTP();
 
-    await customer.save();
+    await redisClient.setEx(`2fa:${customer.email}`, 300, otp);
 
-    await sendSMS(customer.phone, `Dear ${customer.name}, your login OTP is ${otp}`);
+    await sendSMS(customer.phone, `Your login OTP is: ${otp}`);
 
-    return {
-      message: '2FA enabled. Please verify OTP sent to your phone.',
-      requires2FA: true,
-      customerId: customer._id,
-      email: customer.email, 
-    };
+    return { message: '2FA enabled. Verify OTP to complete login.' };
   }
 
   const token = generateToken({
@@ -90,31 +84,35 @@ export const loginCustomerService = async ({ email, password }) => {
   });
 
   return {
-    message: 'Login successful',
-    requires2FA: false,
-    token,
     customer: {
       id: customer._id,
       name: customer.name,
       email: customer.email,
     },
+    token,
   };
 };
 
 
-// Verify 2FA OTP for login
 export const verify2FALoginService = async ({ email, otp }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
-  if (!customer.twoFactorEnabled) throw new Error('2FA not enabled');
-  if (isOTPExpired(customer.otpExpiresAt)) throw new Error('OTP expired');
-  if (customer.twoFactorCode !== otp) throw new Error('Invalid OTP');
 
-  customer.twoFactorCode = null;
-  customer.otpExpiresAt = null;
-  await customer.save();
+  const storedOtp = await redisClient.get(`2fa:${email}`);
+  if (!storedOtp) throw new Error('OTP expired or not found');
 
-  const token = generateToken({ id: customer._id, email: customer.email, role: customer.role });
+  if (storedOtp !== otp) throw new Error('Invalid OTP');
+
+  await redisClient.del(`2fa:${email}`);
+
+  // Generate token
+  const token = generateToken({
+    id: customer._id,
+    email: customer.email,
+    role: customer.role,
+  });
+
+  await sendSMS(customer.phone, `Dear ${customer.name}, you have logged in successfully.`);
 
   return { customer, token };
 };

@@ -50,7 +50,6 @@ export const loginCustomer = async (req, res) => {
   }
 };
 
-// Verify 2FA OTP for login
 export const verify2FALogin = async (req, res) => {
   try {
     const { customer, token } = await verify2FALoginService(req.body);
