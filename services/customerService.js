@@ -112,6 +112,8 @@ export const verify2FALoginService = async ({ email, otp }) => {
     role: customer.role,
   });
 
+  await sendSMS(customer.phone, `Dear ${customer.name}, you have logged in successfully.`);
+
   return { customer, token };
 };
 
