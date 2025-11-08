@@ -19,7 +19,7 @@ import customerAuth from '../middleware/customerAuth.js';
 
 const loginLimiter = rateLimit({
   windowMs: 2 * 60 * 1000, 
-  max: 3, 
+  max: 8, 
   message: {
     success: false,
     message: 'Too many login attempts. Please try again after 15 minutes.',
