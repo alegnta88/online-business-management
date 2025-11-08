@@ -1,4 +1,3 @@
-
 import { addItemToCart, getCartForCustomer, removeItemFromCart, clearCustomerCartService, } from '../services/cartService.js';
 
 export const addToCart = async (req, res) => {
