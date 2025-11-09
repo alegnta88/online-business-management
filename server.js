@@ -11,6 +11,7 @@ import stripeRouter from './routes/stripeRoute.js';
 import orderRouter from './routes/orderRoute.js';
 import customerRouter from './routes/customerRoute.js';
 import cartRouter from './routes/cartRoute.js';
+import categoryRouter from './routes/categoryRoute.js';
 
 dotenv.config();
 
@@ -20,13 +21,11 @@ const PORT = process.env.PORT || 5000;
 
 connectCloudinary();
 
-// middlewares
 app.use(express.json());
 app.use(cors());
 
 app.use(morgan("dev"));
 
-//api endpoints
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
 app.use("/api/v1/payment", paymentRouter);
@@ -35,6 +34,7 @@ app.use("/api/v1/orders", orderRouter);
 
 app.use('/api/v1/customers', customerRouter);
 app.use('/api/v1/cart', cartRouter)
+app.use('/api/v1/categories', categoryRouter);
 
 app.get('/', (req, res) => {
     res.status(200).send('App is running');

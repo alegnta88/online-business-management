@@ -1,4 +1,5 @@
 import ProductModel from '../models/productModel.js';
+import CategoryModel from '../models/categoryModel.js';
 import { uploadImage, deleteImage } from './cloudinaryService.js';
 import mongoose from 'mongoose';
 
@@ -6,11 +7,16 @@ export const createProduct = async (data, files, user) => {
   const { name, price, description, category, subcategory, sizes, bestseller } = data;
 
   if (!name || !price || !description || !category) {
-    throw new Error('Please provide all required fields');
+    throw new Error("Please provide all required fields.");
   }
 
   if (isNaN(price) || price <= 0) {
-    throw new Error('Invalid price');
+    throw new Error("Invalid product price.");
+  }
+
+  const categoryDoc = await CategoryModel.findById(category).catch(() => null);
+  if (!categoryDoc) {
+    throw new Error("The selected category does not exist. Please choose a valid category.");
   }
 
   const imageArray = [];
@@ -23,29 +29,29 @@ export const createProduct = async (data, files, user) => {
   }
 
   if (imageArray.length === 0) {
-    throw new Error('At least one product image is required');
+    throw new Error("At least one product image is required.");
   }
 
   let parsedSizes = [];
   if (sizes) {
     try {
-      parsedSizes = typeof sizes === 'string' ? JSON.parse(sizes) : sizes;
+      parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
     } catch {
       parsedSizes = Array.isArray(sizes) ? sizes : [sizes];
     }
   }
 
-  const productStatus = user?.role === 'admin' ? 'approved' : 'pending';
+  const productStatus = user?.role === "admin" ? "approved" : "pending";
 
   const product = new ProductModel({
     name: name.trim(),
     price: Number(price),
     description: description.trim(),
     image: imageArray,
-    category: category.trim(),
-    subcategory: subcategory?.trim() || '',
+    category: categoryDoc._id,
+    subcategory: subcategory?.trim() || "",
     sizes: parsedSizes,
-    bestseller: bestseller === 'true' || bestseller === true,
+    bestseller: bestseller === "true" || bestseller === true,
     status: productStatus,
     addedBy: user?._id,
     date: Date.now(),
@@ -54,7 +60,6 @@ export const createProduct = async (data, files, user) => {
   return await product.save();
 };
 
-// Get products
 export const getProducts = async (queryParams, user) => {
   
   const limit = parseInt(queryParams.limit) || 8;

@@ -21,9 +21,9 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product image is required"],
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category", 
       required: [true, "Product category is required"],
-      trim: true,
     },
     subcategory: {
       type: String,
@@ -44,17 +44,16 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"], 
-      default: "pending", 
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
     },
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      ref: "User",
     },
   },
   { timestamps: true }
 );
 
 const ProductModel = mongoose.model("Product", productSchema);
-
 export default ProductModel;

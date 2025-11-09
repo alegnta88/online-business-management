@@ -163,10 +163,7 @@ export const disable2FAService = async (customerId) => {
 
   await customer.save();
 
-  await sendSMS(
-    customer.phone,
-    `Dear ${customer.name}, two-factor authentication has been disabled for your account.`
-  );
+  await sendSMS( customer.phone, `Dear ${customer.name}, two-factor authentication has been disabled for your account.`);
 
   return { message: '2FA has been disabled successfully.' };
 };
