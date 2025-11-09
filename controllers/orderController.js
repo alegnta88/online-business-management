@@ -47,37 +47,7 @@ export const updateOrderStatus = async (req, res) => {
     const orderId = req.params.id;
     const newStatus = req.body.status;
 
-    const order = await OrderModel.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
-    }
-
-    // If user is not admin, ensure they own the order
-    if (user.role !== 'admin' && order.customer.toString() !== user.id) {
-      return res.status(403).json({ success: false, message: 'You cannot update this order.' });
-    }
-
-    // Allowed status transitions for customers
-    const allowedTransitions = {
-      pending: ['processing'],
-      processing: ['shipped'],
-      shipped: [],
-      delivered: [],
-      cancelled: [],
-    };
-
-    if (user.role !== 'admin') {
-      if (!allowedTransitions[order.orderStatus].includes(newStatus)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `You cannot change status from ${order.orderStatus} to ${newStatus}` 
-        });
-      }
-    }
-
-    // Update the order status
-    order.orderStatus = newStatus;
-    await order.save();
+    const order = await updateOrderStatusService(user, orderId, newStatus);
 
     res.status(200).json({ success: true, message: 'Order status updated', order });
   } catch (error) {

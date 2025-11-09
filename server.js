@@ -20,32 +20,29 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 connectCloudinary();
+connectToDatabase();
 
-app.use(express.json());
 app.use(cors());
-
 app.use(morgan("dev"));
 
+app.use("/api/v1/stripe", stripeRouter);
+
+app.use(express.json());
+
+// Other Routes
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
 app.use("/api/v1/payment", paymentRouter);
-app.use("/api/v1/stripe", stripeRouter);
 app.use("/api/v1/orders", orderRouter);
-
 app.use('/api/v1/customers', customerRouter);
-app.use('/api/v1/cart', cartRouter)
+app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/categories', categoryRouter);
 
 app.get('/', (req, res) => {
-    res.status(200).send('App is running');
+  res.status(200).send('App is running');
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
-
-connectToDatabase();
-
+// Error handling
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -59,4 +56,8 @@ app.use((err, req, res, next) => {
     success: false,
     message: err.message || 'Internal Server Error'
   });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
