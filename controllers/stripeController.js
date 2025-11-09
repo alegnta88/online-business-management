@@ -1,8 +1,4 @@
-import {
-  createStripeCheckout,
-  verifyStripeSession,
-  handleStripeWebhookEvent,
-} from "../services/stripeService.js";
+import { createStripeCheckout, verifyStripeSession, handleStripeWebhookEvent, } from "../services/stripeService.js";
 
 export const createCheckoutSession = async (req, res) => {
   const { orderId, email, productName, amount } = req.body;
