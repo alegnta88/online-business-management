@@ -12,6 +12,7 @@ import {
   activateCustomer,
   requestPasswordReset,
   resetPassword,
+  disable2FA
 } from '../controllers/customerController.js';
 import adminAuth from '../middleware/adminAuth.js';
 import userAuth from '../middleware/userAuth.js';
@@ -38,7 +39,9 @@ customerRouter.post('/login', loginLimiter, loginCustomer);
 customerRouter.post('/login/verify', verify2FALogin);       
 
 customerRouter.post('/2fa/enable', customerAuth, enable2FA);          
-customerRouter.post('/2fa/verify', customerAuth, verifyEnable2FA);    
+customerRouter.post('/2fa/verify', customerAuth, verifyEnable2FA);
+
+customerRouter.post('/2fa/disable', customerAuth, disable2FA);          
 
 customerRouter.get('/', adminAuth, getAllCustomers);
 customerRouter.put('/:id/deactivate', adminAuth, deactivateCustomer);
