@@ -2,6 +2,8 @@ import OrderModel from '../models/orderModel.js';
 import ProductModel from '../models/productModel.js';
 import mongoose from 'mongoose';
 import { sendSMS } from '../utils/sendSMS.js';
+import CustomerModel from '../models/customerModel.js';
+
 
 export const createOrderService = async (customer, items, shippingAddress) => {
   if (!items || items.length === 0) throw new Error("No items in the order");
@@ -75,6 +77,12 @@ export const updateOrderStatusService = async (user, orderId, newStatus) => {
 
   order.orderStatus = newStatus;
   await order.save();
+
+  const customer = await CustomerModel.findById(order.customer);
+  if (customer) {
+    const smsSent = await sendSMS(customer.phone, `Your order status has been updated to: ${newStatus}`);
+    if (!smsSent) console.warn(`Failed to send SMS to ${customer.phone}`);
+  }
 
   return order;
 };
