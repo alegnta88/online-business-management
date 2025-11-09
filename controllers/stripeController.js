@@ -60,6 +60,8 @@ export const verifyPayment = async (req, res) => {
 export const stripeWebhookHandler = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  
   let event;
 
   try {
@@ -68,6 +70,8 @@ export const stripeWebhookHandler = async (req, res) => {
     console.error("⚠️ Webhook signature verification failed.", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  console.log("Event type:", event.type);
 
   switch (event.type) {
     case "checkout.session.completed":
@@ -78,15 +82,18 @@ export const stripeWebhookHandler = async (req, res) => {
         try {
           const order = await OrderModel.findById(orderId);
           if (order) {
+            
             order.paymentStatus = "paid";
             await order.save();
-            console.log(`✅ Payment succeeded for order ${orderId}`);
+            
           } else {
-            console.warn(`Order not found: ${orderId}`);
+            console.warn(`❌ Order not found: ${orderId}`);
           }
         } catch (err) {
-          console.error("Error updating order payment status:", err);
+          console.error("❌ Error updating order payment status:", err);
         }
+      } else {
+        console.warn("⚠️ No orderId in session metadata");
       }
       break;
 
