@@ -1,8 +1,9 @@
 import OrderModel from '../models/orderModel.js';
 import ProductModel from '../models/productModel.js';
 import mongoose from 'mongoose';
+import { sendSMS } from '../utils/sendSMS.js';
 
-export const createOrderService = async (customerId, items, shippingAddress) => {
+export const createOrderService = async (customer, items, shippingAddress) => {
   if (!items || items.length === 0) throw new Error('No items in the order');
 
   const orderItems = [];
@@ -31,13 +32,18 @@ export const createOrderService = async (customerId, items, shippingAddress) => 
   }
 
   const order = new OrderModel({
-    customer: customerId,
+    customer: customer._id,
     items: orderItems,
     totalAmount,
     shippingAddress
   });
 
   await order.save();
+
+  const message = `Dear ${customer.name}, your order has been placed successfully. Your Total Price is: $${order.totalAmount}`;
+  const smsSent = await sendSMS(customer.phone, message);
+  if (!smsSent) console.warn(`Failed to send SMS to ${customer.phone}`);
+
   return order;
 }
 
