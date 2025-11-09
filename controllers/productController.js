@@ -34,7 +34,7 @@ export const listProduct = async (req, res) => {
 // Delete product
 export const removeProduct = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     await deleteProduct(id);
     res.status(200).json({ success: true, message: 'Product removed successfully' });
   } catch (error) {
@@ -45,7 +45,8 @@ export const removeProduct = async (req, res) => {
 // Get single product
 export const singleProduct = async (req, res) => {
   try {
-    const product = await getProductById(req.params.id);
+    const { id } = req.params;
+    const product = await getProductById(id);
     res.status(200).json({ success: true, product });
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });
