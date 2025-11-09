@@ -76,10 +76,6 @@ export const getProducts = async (queryParams, user) => {
     filter.category = queryParams.category;
   }
 
-  if (queryParams.bestseller) {
-    filter.bestseller = queryParams.bestseller === "true";
-  }
-
   const cursorQuery = cursor ? { _id: { $lt: cursor } } : {};
   const products = await ProductModel.find({ ...filter, ...cursorQuery })
     .sort({ _id: -1 })
