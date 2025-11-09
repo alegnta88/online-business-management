@@ -61,25 +61,26 @@ export const createProduct = async (data, files, user) => {
 };
 
 export const getProducts = async (queryParams, user) => {
-  
+
   const limit = parseInt(queryParams.limit) || 8;
   const cursor = queryParams.cursor;
-
   const filter = {};
 
-  if (queryParams.category) filter.category = queryParams.category;
-  if (queryParams.bestseller) filter.bestseller = queryParams.bestseller === 'true';
+  if (user?.role !== "admin") {
+    filter.status = "approved";  
+  } else if (queryParams.status) {
+    filter.status = queryParams.status; 
+  }
 
-  if (user?.role === 'admin') {
-    if (queryParams.status) {
-      filter.status = queryParams.status;
-    }
-  } else {
-    filter.status = 'approved';
+  if (queryParams.category && mongoose.Types.ObjectId.isValid(queryParams.category)) {
+    filter.category = queryParams.category;
+  }
+
+  if (queryParams.bestseller) {
+    filter.bestseller = queryParams.bestseller === "true";
   }
 
   const cursorQuery = cursor ? { _id: { $lt: cursor } } : {};
-
   const products = await ProductModel.find({ ...filter, ...cursorQuery })
     .sort({ _id: -1 })
     .limit(limit + 1);
@@ -88,12 +89,9 @@ export const getProducts = async (queryParams, user) => {
   const resultProducts = hasMore ? products.slice(0, limit) : products;
   const nextCursor = hasMore ? resultProducts[resultProducts.length - 1]._id : null;
 
-  return {
-    products: resultProducts,
-    nextCursor,
-    hasMore,
-  };
+  return { products: resultProducts, nextCursor, hasMore };
 };
+
 
 export const deleteProduct = async (id) => {
 
