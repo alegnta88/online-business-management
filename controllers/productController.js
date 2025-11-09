@@ -52,7 +52,6 @@ export const singleProduct = async (req, res) => {
   }
 };
 
-// admin approvbe product
 export const approveProduct = async (req, res) => {
   try {
     const product = await approveProductById(req.params.id);

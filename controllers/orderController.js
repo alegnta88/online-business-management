@@ -11,11 +11,7 @@ export const createOrder = async (req, res) => {
     const customer = await CustomerModel.findById(customerId);
     if (!customer) throw new Error('Customer not found');
 
-    const order = await createOrderService(customerId, req.body.items, req.body.shippingAddress);
-
-    const message = `Dear ${customer.name}, your order has been placed successfully. Your Total Price is: $${order.totalAmount}`;
-    const smsSent = await sendSMS(customer.phone, message);
-    if (!smsSent) console.warn(`Failed to send SMS to ${customer.phone}`);
+    const order = await createOrderService(customer, req.body.items, req.body.shippingAddress);
 
     res.status(201).json({ 
       success: true, 
