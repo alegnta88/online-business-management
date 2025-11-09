@@ -13,7 +13,6 @@ import {
   disable2FAService
 } from '../services/customerService.js';
 
-// Register new customer
 export const registerCustomer = async (req, res) => {
   try {
     const customer = await registerCustomerService(req.body);
@@ -27,7 +26,6 @@ export const registerCustomer = async (req, res) => {
   }
 };
 
-// Verify registration OTP
 export const verifyOTP = async (req, res) => {
   try {
     const { customer, token } = await verifyCustomerOTPService(req.body);
@@ -41,7 +39,6 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
-// Login customer
 export const loginCustomer = async (req, res) => {
   try {
     const result = await loginCustomerService(req.body);
@@ -73,7 +70,6 @@ export const enable2FA = async (req, res) => {
   }
 };
 
-// Verify enabling 2FA
 export const verifyEnable2FA = async (req, res) => {
   try {
     const result = await verifyEnable2FAService({ customerId: req.user.id, otp: req.body.otp });
@@ -92,7 +88,6 @@ export const disable2FA = async (req, res) => {
   }
 };
 
-// Get all customers
 export const getAllCustomers = async (req, res) => {
   try {
     const { customers, nextCursor } = await getAllCustomersService(
@@ -140,7 +135,6 @@ export const requestPasswordReset = async (req, res) => {
   }
 };
 
-// Reset password
 export const resetPassword = async (req, res) => {
   try {
     const result = await resetPasswordService(req.body);

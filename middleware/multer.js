@@ -2,12 +2,10 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Define upload directory
 const uploadDir = 'uploads/';
 
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
