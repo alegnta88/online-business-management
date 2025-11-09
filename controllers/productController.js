@@ -19,7 +19,6 @@ export const addProduct = async (req, res) => {
   }
 };
 
-// List products
 export const listProduct = async (req, res) => {
   try {
     const user = req.user;
@@ -31,7 +30,6 @@ export const listProduct = async (req, res) => {
   }
 };
 
-// Delete product
 export const removeProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -42,7 +40,6 @@ export const removeProduct = async (req, res) => {
   }
 };
 
-// Get single product
 export const singleProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -66,7 +63,6 @@ export const approveProduct = async (req, res) => {
   }
 };
 
-// admin reject product
 export const rejectProduct = async (req, res) => {
   try {
     const product = await rejectProductById(req.params.id);

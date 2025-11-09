@@ -27,19 +27,18 @@ export const createOrderService = async (customer, items, shippingAddress) => {
     });
   }
 
-  // Create order with pending payment
   const order = new OrderModel({
     customer: customer._id,
     items: orderItems,
     totalAmount,
     shippingAddress,
-    paymentStatus: "pending", // initially pending
-    orderStatus: "pending",   // initially pending
+    paymentStatus: "pending", 
+    orderStatus: "pending",  
   });
 
   await order.save();
 
-  return order; // Return order for Stripe metadata
+  return order; 
 };
 
 export const getOrdersByCustomerService = async (customerId) => {
@@ -56,7 +55,6 @@ export const updateOrderStatusService = async (user, orderId, newStatus) => {
   const order = await OrderModel.findById(orderId);
   if (!order) throw new Error('Order not found');
 
-  // Only admin or the owner can update
   if (user.role !== 'admin' && order.customer.toString() !== user.id) {
     throw new Error('You cannot update this order.');
   }

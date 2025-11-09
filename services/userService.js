@@ -6,7 +6,6 @@ import { sendEmail } from '../utils/sendEmail.js';
 
 const adminOtpStore = {};
 
-// Register a new user
 export const registerUserService = async ({ name, email, phone, password }, isAdmin = false) => {
   if (!isAdmin) throw new Error('Only admin can create users');
 
@@ -28,7 +27,6 @@ export const registerUserService = async ({ name, email, phone, password }, isAd
   return user;
 };
 
-// Login for users
 export const loginUserService = async ({ email, password }) => {
   const user = await UserModel.findOne({ email });
   if (!user) throw new Error('User not found');
@@ -43,7 +41,6 @@ export const loginUserService = async ({ email, password }) => {
   return { user, token };
 };
 
-// Deactivate a user
 export const deactivateUserById = async (id) => {
   const user = await UserModel.findById(id);
   if (!user) throw new Error('User not found');
@@ -54,7 +51,6 @@ export const deactivateUserById = async (id) => {
   return user;
 };
 
-// Activate a user
 export const activateUserById = async (id) => {
   const user = await UserModel.findById(id);
   if (!user) throw new Error('User not found');

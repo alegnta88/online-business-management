@@ -105,7 +105,6 @@ export const verify2FALoginService = async ({ email, otp }) => {
 
   await redisClient.del(`2fa:${email}`);
 
-  // Generate token
   const token = generateToken({
     id: customer._id,
     email: customer.email,
@@ -156,7 +155,6 @@ export const disable2FAService = async (customerId) => {
     throw new Error('2FA is already disabled.');
   }
 
-  // Disable 2FA
   customer.twoFactorEnabled = false;
   customer.twoFactorCode = null;
   customer.otpExpiresAt = null;
@@ -168,7 +166,6 @@ export const disable2FAService = async (customerId) => {
   return { message: '2FA has been disabled successfully.' };
 };
 
-// Deactivate customer
 export const deactivateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
@@ -180,7 +177,6 @@ export const deactivateCustomerService = async (id) => {
   return customer;
 };
 
-// Activate customer
 export const activateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);
   if (!customer) throw new Error('Customer not found');
@@ -192,7 +188,6 @@ export const activateCustomerService = async (id) => {
   return customer;
 };
 
-// Get all customers
 export const getAllCustomersService = async (limit = 10, cursor) => {
   const query = cursor ? { _id: { $gt: cursor } } : {};
   const customers = await CustomerModel.find(query)
@@ -203,7 +198,6 @@ export const getAllCustomersService = async (limit = 10, cursor) => {
   const nextCursor = customers.length ? customers[customers.length - 1]._id : null;
   return { customers, nextCursor };
 };
-
 
 export const requestPasswordResetService = async (email) => {
   const customer = await CustomerModel.findOne({ email });
@@ -221,7 +215,6 @@ export const requestPasswordResetService = async (email) => {
   return { message: 'Password reset OTP sent successfully.' };
 };
 
-// Reset password
 export const resetPasswordService = async ({ email, otp, newPassword }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');

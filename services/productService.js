@@ -95,7 +95,6 @@ export const getProducts = async (queryParams, user) => {
   };
 };
 
-// Delete product
 export const deleteProduct = async (id) => {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -114,7 +113,6 @@ export const deleteProduct = async (id) => {
   return true;
 };
 
-// Get product by ID
 export const getProductById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error('Invalid product ID');
@@ -125,7 +123,6 @@ export const getProductById = async (id) => {
   return product;
 };
 
-// admin approve product by it's id number
 export const approveProductById = async (id) => {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {  
@@ -141,7 +138,6 @@ export const approveProductById = async (id) => {
   return product;
 };
 
-// admin reject product by it's id
 export const rejectProductById = async (id) => {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {

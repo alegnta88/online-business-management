@@ -26,7 +26,6 @@ export const initializePaymentService = async ({ amount, email, first_name, last
   return response.data;
 };
 
-
 export const verifyPaymentService = async (tx_ref) => {
   const response = await axios.get(`https://api.chapa.co/v1/transaction/verify/${tx_ref}`, {
     headers: { Authorization: `Bearer ${CHAPA_SECRET_KEY}` },

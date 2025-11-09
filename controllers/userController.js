@@ -9,8 +9,6 @@ import {
 import UserModel from '../models/userModel.js';
 import { generateToken } from '../utils/jwt.js';
 
-
-// Register a new user
 export const registerUserByAdmin = async (req, res) => {
   try {
     const user = await registerUserService({ ...req.body, role: 'user' }, true);
@@ -24,7 +22,6 @@ export const registerUserByAdmin = async (req, res) => {
   }
 };
 
-// Get all users 
 export const getAllUsers = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
@@ -51,7 +48,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Admin login
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -71,7 +67,6 @@ export const adminLogin = async (req, res) => {
   }
 };
 
-// Admin verify OTP
 export const adminVerifyOTPController = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -89,7 +84,6 @@ export const adminVerifyOTPController = async (req, res) => {
   }
 };
 
-// Activate a user
 export const activateUser = async (req, res) => {
   try {
     const user = await activateUserById(req.params.id);
@@ -103,7 +97,6 @@ export const activateUser = async (req, res) => {
   }
 };
 
-// Deactivate a user
 export const deactivateUser = async (req, res) => {
   try {
     const user = await deactivateUserById(req.params.id);
@@ -117,7 +110,6 @@ export const deactivateUser = async (req, res) => {
   }
 };
 
-// login for normal users
 export const loginUser = async (req, res) => {
   try {
     const { user, token } = await loginUserService(req.body);
