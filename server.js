@@ -10,6 +10,7 @@ import paymentRouter from './routes/paymentRoute.js';
 import stripeRouter from './routes/stripeRoute.js';
 import orderRouter from './routes/orderRoute.js';
 import customerRouter from './routes/customerRoute.js';
+import cartRouter from './routes/cartRoute.js';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/v1/stripe", stripeRouter);
 app.use("/api/v1/orders", orderRouter);
 
 app.use('/api/v1/customers', customerRouter);
+app.use('/api/v1/cart', cartRouter)
 
 app.get('/', (req, res) => {
     res.status(200).send('App is running');

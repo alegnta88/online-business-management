@@ -148,6 +148,29 @@ export const verifyEnable2FAService = async ({ customerId, otp }) => {
   return { message: '2FA enabled successfully.' };
 };
 
+export const disable2FAService = async (customerId) => {
+  const customer = await CustomerModel.findById(customerId);
+  if (!customer) throw new Error('Customer not found');
+
+  if (!customer.twoFactorEnabled) {
+    throw new Error('2FA is already disabled.');
+  }
+
+  // Disable 2FA
+  customer.twoFactorEnabled = false;
+  customer.twoFactorCode = null;
+  customer.otpExpiresAt = null;
+
+  await customer.save();
+
+  await sendSMS(
+    customer.phone,
+    `Dear ${customer.name}, two-factor authentication has been disabled for your account.`
+  );
+
+  return { message: '2FA has been disabled successfully.' };
+};
+
 // Deactivate customer
 export const deactivateCustomerService = async (id) => {
   const customer = await CustomerModel.findById(id);

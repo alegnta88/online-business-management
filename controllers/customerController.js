@@ -10,6 +10,7 @@ import {
   deactivateCustomerService,
   requestPasswordResetService,
   resetPasswordService,
+  disable2FAService
 } from '../services/customerService.js';
 
 // Register new customer
@@ -76,6 +77,15 @@ export const enable2FA = async (req, res) => {
 export const verifyEnable2FA = async (req, res) => {
   try {
     const result = await verifyEnable2FAService({ customerId: req.user.id, otp: req.body.otp });
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const disable2FA = async (req, res) => {
+  try {
+    const result = await disable2FAService(req.user.id);
     res.json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
