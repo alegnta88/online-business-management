@@ -3,6 +3,7 @@ import { hashPassword, comparePassword } from '../utils/password.js';
 import { generateToken } from '../utils/jwt.js';
 import { generateOTP } from '../utils/otpGenerator.js';
 import { sendEmail } from '../utils/sendEmail.js';
+import { sendSMS } from '../utils/sendSMS.js';
 
 const adminOtpStore = {};
 
@@ -24,6 +25,9 @@ export const registerUserService = async ({ name, email, phone, password }, isAd
   });
 
   await user.save();
+  const smsSent = await sendSMS(phone, `Dear ${name}, your user account has been created successfully by admin.`);
+  if (!smsSent) throw new Error('Failed to send notification SMS. Please try again.');
+  
   return user;
 };
 
