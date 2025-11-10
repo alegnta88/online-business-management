@@ -4,6 +4,7 @@ import { generateToken } from '../utils/jwt.js';
 import { generateOTP } from '../utils/otpGenerator.js';
 import { sendEmail } from '../utils/sendEmail.js';
 import { sendSMS } from '../utils/sendSMS.js';
+import redisClient from '../config/redis.js';
 
 const adminOtpStore = {};
 
@@ -27,7 +28,7 @@ export const registerUserService = async ({ name, email, phone, password }, isAd
   await user.save();
   const smsSent = await sendSMS(phone, `Dear ${name}, your user account has been created successfully by admin.`);
   if (!smsSent) throw new Error('Failed to send notification SMS. Please try again.');
-  
+
   return user;
 };
 
@@ -65,40 +66,32 @@ export const activateUserById = async (id) => {
   return user;
 };
 
-
 export const createAdminOTP = async (email, password) => {
   if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
     console.log('Invalid admin login attempt for email:', email);
-    console.log('Provided password:', password);
     throw new Error('Invalid admin credentials');
   }
 
-  const otp = generateOTP();
-
-  adminOtpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+  const otp = generateOTP(6);
+  await redisClient.setEx(`otp:admin-login:${email}`, 300, otp);
 
   const emailSent = await sendEmail(
-  email,
-  'Admin Login OTP',
-  `Use this code to finish your login: ${otp}`
-);
+    email,
+    'Admin Login OTP',
+    `Use this code to finish your login: ${otp}`
+  );
   if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
 
-  return otp;
+  return { message: 'OTP sent to admin email.' };
 };
 
-export const verifyAdminOTP = (email, otp) => {
-  const stored = adminOtpStore[email];
-  if (!stored) throw new Error('OTP not found. Please login first.');
+export const verifyAdminOTP = async (email, otp) => {
+  const storedOtp = await redisClient.get(`otp:admin-login:${email}`);
+  if (!storedOtp) throw new Error('OTP expired or not found');
+  if (storedOtp !== otp) throw new Error('Invalid OTP');
 
-  if (Date.now() > stored.expires) {
-    delete adminOtpStore[email];
-    throw new Error('OTP expired. Please login again.');
-  }
+  await redisClient.del(`otp:admin-login:${email}`);
 
-  if (otp !== stored.otp) throw new Error('Invalid OTP');
-
-  delete adminOtpStore[email];
-
-  return generateToken({ role: 'admin', email });
+  const token = generateToken({ role: 'admin', email });
+  return { token, message: 'Admin logged in successfully.' };
 };
