@@ -15,7 +15,6 @@ import {
   disable2FA
 } from '../controllers/customerController.js';
 import adminAuth from '../middleware/adminAuth.js';
-import userAuth from '../middleware/userAuth.js';
 import customerAuth from '../middleware/customerAuth.js';
 
 const loginLimiter = rateLimit({

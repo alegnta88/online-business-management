@@ -10,7 +10,6 @@ import {
 } from '../controllers/productController.js';
 import upload from '../middleware/multer.js';
 import adminAuth from '../middleware/adminAuth.js';
-import userAuth from '../middleware/userAuth.js';
 import optionalAuth from '../middleware/optionalAuth.js';
 import adminOrUserAuth from '../middleware/adminOrUserAuth.js';
 
