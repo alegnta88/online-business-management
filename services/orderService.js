@@ -62,6 +62,10 @@ export const updateOrderStatusService = async (user, orderId, newStatus) => {
     throw new Error('You cannot update this order.');
   }
 
+  if (order.orderStatus === newStatus) {
+    throw new Error(`Order is already in '${newStatus}' status`);
+  }
+
   const allowedTransitions = {
     pending: ['processing'],
     processing: ['shipped'],
