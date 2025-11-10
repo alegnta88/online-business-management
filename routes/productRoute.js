@@ -5,7 +5,8 @@ import {
   removeProduct,
   singleProduct,
   approveProduct,
-  rejectProduct
+  rejectProduct,
+  updateStock
 } from '../controllers/productController.js';
 import upload from '../middleware/multer.js';
 import adminAuth from '../middleware/adminAuth.js';
@@ -22,6 +23,7 @@ productRouter.get('/', optionalAuth, listProduct);
 productRouter.get('/:id', optionalAuth, singleProduct);
 
 productRouter.delete('/:id', adminOrUserAuth, removeProduct);
+productRouter.put('/:id/stock', adminAuth, updateStock);
 
 productRouter.put('/:id/approve', adminAuth, approveProduct);
 productRouter.put('/:id/reject', adminAuth, rejectProduct);
