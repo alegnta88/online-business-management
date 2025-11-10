@@ -51,6 +51,11 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    stock: {
+      type: Number,
+      required: true,
+      default: 0,
+  },
   },
   { timestamps: true }
 );
