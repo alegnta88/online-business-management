@@ -70,6 +70,11 @@ export const updateOrderStatusService = async (user, orderId, newStatus) => {
     cancelled: [],
   };
 
+  const validStatuses = Object.keys(allowedTransitions);
+  if (!validStatuses.includes(newStatus)) {
+    throw new Error(`Invalid status: ${newStatus}`);
+  }
+
   if (user.role !== 'admin') {
     if (!allowedTransitions[order.orderStatus].includes(newStatus)) {
       throw new Error(`You cannot change status from ${order.orderStatus} to ${newStatus}`);
@@ -80,7 +85,7 @@ export const updateOrderStatusService = async (user, orderId, newStatus) => {
   await order.save();
 
   const customer = await CustomerModel.findById(order.customer);
-  if (customer) {
+  if (customer?.phone) {
     const smsSent = await sendSMS(customer.phone, `Your order status has been updated to: ${newStatus}`);
     if (!smsSent) console.warn(`Failed to send SMS to ${customer.phone}`);
   }
