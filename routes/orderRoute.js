@@ -1,6 +1,5 @@
 import express from 'express';
 import { createOrder, getMyOrders, getAllOrders, updateOrderStatus } from '../controllers/orderController.js';
-import userAuth from '../middleware/userAuth.js';
 import adminAuth from '../middleware/adminAuth.js';
 import customerAuth from '../middleware/customerAuth.js';
 

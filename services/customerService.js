@@ -52,7 +52,8 @@ export const verifyCustomerOTPService = async ({ email, otp }) => {
 
   const token = generateToken({ id: customer._id, email: customer.email, role: customer.role });
 
-  await sendSMS(customer.phone, `Dear ${customer.name}, your registration is verified successfully.`);
+  await sendSMS(customer.phone, `Dear ${customer.name}, your account is verified successfully.`);
+  console.log(`SMS sent to ${customer.phone}: Your account is verified successfully.`);
 
   return { customer, token };
 };
@@ -61,6 +62,8 @@ export const verifyCustomerOTPService = async ({ email, otp }) => {
 export const loginCustomerService = async ({ email, password }) => {
   const customer = await CustomerModel.findOne({ email });
   if (!customer) throw new Error('Customer not found');
+
+  if(!customer.isVerified) throw new Error('Please verify your account first');
 
   const isMatch = await comparePassword(password, customer.password);
   if (!isMatch) throw new Error('Invalid credentials');
