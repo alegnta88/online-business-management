@@ -43,14 +43,17 @@ export const getAllOrders = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
   try {
-    const user = req.user;
-    const orderId = req.params.id;
-    const newStatus = req.body.status;
+    const { id } = req.params;
+    const { status } = req.body;
 
-    const order = await updateOrderStatusService(user, orderId, newStatus);
+    if (!id) throw new Error("Order ID is required");
+    if (!status) throw new Error("New status is required");
+
+    const order = await updateOrderStatusService(req.user, id, status);
 
     res.status(200).json({ success: true, message: 'Order status updated', order });
   } catch (error) {
+    console.error('Error updating order:', error.message);
     res.status(400).json({ success: false, message: error.message });
   }
 };
