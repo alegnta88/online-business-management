@@ -58,8 +58,8 @@ export const updateOrderStatusService = async (user, orderId, newStatus) => {
   const order = await OrderModel.findById(orderId);
   if (!order) throw new Error('Order not found');
 
-  if (user.role !== 'admin' && order.customer.toString() !== user.id) {
-    throw new Error('You cannot update this order.');
+  if (user.role !== 'admin') {
+    throw new Error('You are not authorized to update this order');
   }
 
   if (order.orderStatus === newStatus) {
