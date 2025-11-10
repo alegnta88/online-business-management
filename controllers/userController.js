@@ -7,7 +7,6 @@ import {
   verifyAdminOTP
 } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
-import { generateToken } from '../utils/jwt.js';
 
 export const registerUserByAdmin = async (req, res) => {
   try {

@@ -1,7 +1,5 @@
 import UserModel from '../models/userModel.js';
 import { createOrderService, getOrdersByCustomerService, getAllOrdersService, updateOrderStatusService } from '../services/orderService.js';
-import { sendSMS } from '../utils/sendSMS.js';
-import OrderModel from '../models/orderModel.js';
 import CustomerModel from '../models/customerModel.js';
 import logger from '../utils/logger.js';
 

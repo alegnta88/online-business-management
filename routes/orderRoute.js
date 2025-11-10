@@ -3,7 +3,6 @@ import { createOrder, getMyOrders, getAllOrders, updateOrderStatus } from '../co
 import userAuth from '../middleware/userAuth.js';
 import adminAuth from '../middleware/adminAuth.js';
 import customerAuth from '../middleware/customerAuth.js';
-import adminOrUserAuth from '../middleware/adminOrUserAuth.js';
 
 const orderRouter = express.Router();
 
