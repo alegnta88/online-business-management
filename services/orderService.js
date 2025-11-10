@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { sendSMS } from '../utils/sendSMS.js';
 import CustomerModel from '../models/customerModel.js';
 
-
+// new order service
 export const createOrderService = async (customer, items, shippingAddress) => {
   if (!items || items.length === 0) throw new Error("No items in the order");
 
@@ -43,6 +43,7 @@ export const createOrderService = async (customer, items, shippingAddress) => {
   return order; 
 };
 
+// let customer view their orders
 export const getOrdersByCustomerService = async (customerId) => {
   return await OrderModel.find({ customer: customerId }).populate('items.product');
 };
