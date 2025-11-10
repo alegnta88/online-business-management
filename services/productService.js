@@ -3,15 +3,20 @@ import CategoryModel from '../models/categoryModel.js';
 import { uploadImage, deleteImage } from './cloudinaryService.js';
 import mongoose from 'mongoose';
 
+// Create a new product
 export const createProduct = async (data, files, user) => {
-  const { name, price, description, category, subcategory, sizes, bestseller } = data;
+  const { name, price, description, category, subcategory, sizes, bestseller, stock } = data;
 
-  if (!name || !price || !description || !category) {
+  if (!name || !price || !description || !category || !stock) {
     throw new Error("Please provide all required fields.");
   }
 
   if (isNaN(price) || price <= 0) {
     throw new Error("Invalid product price.");
+  }
+
+  if (stock != null && (isNaN(stock) || stock < 0)) {
+    throw new Error("Stock must be a non-negative number");
   }
 
   const categoryDoc = await CategoryModel.findById(category).catch(() => null);
@@ -20,7 +25,6 @@ export const createProduct = async (data, files, user) => {
   }
 
   const imageArray = [];
-
   if (files?.length > 0) {
     for (const file of files) {
       const url = await uploadImage(file.path);
@@ -52,6 +56,7 @@ export const createProduct = async (data, files, user) => {
     subcategory: subcategory?.trim() || "",
     sizes: parsedSizes,
     bestseller: bestseller === "true" || bestseller === true,
+    stock: Number(stock) || 0,
     status: productStatus,
     addedBy: user?._id,
     date: Date.now(),
@@ -60,16 +65,16 @@ export const createProduct = async (data, files, user) => {
   return await product.save();
 };
 
+// List products
 export const getProducts = async (queryParams, user) => {
-
   const limit = parseInt(queryParams.limit) || 8;
   const cursor = queryParams.cursor;
   const filter = {};
 
   if (user?.role !== "admin") {
-    filter.status = "approved";  
+    filter.status = "approved";
   } else if (queryParams.status) {
-    filter.status = queryParams.status; 
+    filter.status = queryParams.status;
   }
 
   if (queryParams.category && mongoose.Types.ObjectId.isValid(queryParams.category)) {
@@ -88,11 +93,10 @@ export const getProducts = async (queryParams, user) => {
   return { products: resultProducts, nextCursor, hasMore };
 };
 
-
+// Delete product
 export const deleteProduct = async (id) => {
-
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    new Error('Invalid product ID');
+    throw new Error('Invalid product ID');
   }
   const product = await ProductModel.findById(id);
   if (!product) throw new Error('Product not found');
@@ -107,41 +111,46 @@ export const deleteProduct = async (id) => {
   return true;
 };
 
+// Get single product
 export const getProductById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error('Invalid product ID');
   }
   const product = await ProductModel.findById(id);
   if (!product) throw new Error('Product not found');
-
   return product;
 };
 
+// Approve product
 export const approveProductById = async (id) => {
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {  
-    throw new Error('Invalid product ID');
-  }
-
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
   const product = await ProductModel.findById(id);
   if (!product) throw new Error('Product not found');
-
   product.status = 'approved';
   await product.save();
-
   return product;
 };
 
+// Reject product
 export const rejectProductById = async (id) => {
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new Error('Invalid product ID');
-  }
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
   const product = await ProductModel.findById(id);
   if (!product) throw new Error('Product not found');
-
   product.status = 'rejected';
   await product.save();
+  return product;
+};
 
+// Update product stock
+export const updateStockById = async (id, stock) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
+  if (stock == null || stock < 0) throw new Error('Stock must be a non-negative number');
+
+  const product = await ProductModel.findByIdAndUpdate(
+    id,
+    { stock: Number(stock) },
+    { new: true }
+  );
+  if (!product) throw new Error('Product not found');
   return product;
 };
