@@ -1,4 +1,3 @@
-import UserModel from '../models/userModel.js';
 import { createOrderService, getOrdersByCustomerService, getAllOrdersService, updateOrderStatusService } from '../services/orderService.js';
 import CustomerModel from '../models/customerModel.js';
 import logger from '../utils/logger.js';
@@ -6,14 +5,13 @@ import logger from '../utils/logger.js';
 export const createOrder = async (req, res) => {
   try {
     const customerId = req.user.id;
-
     const customer = await CustomerModel.findById(customerId);
     if (!customer) throw new Error('Customer not found');
     const order = await createOrderService(customer, req.body.items, req.body.shippingAddress);
 
     res.status(201).json({ 
       success: true, 
-      message: 'Order placed successfully', 
+      message: 'Order placed successfully',
       order 
     });
   } catch (error) {
