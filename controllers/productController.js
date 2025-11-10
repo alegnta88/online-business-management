@@ -6,7 +6,6 @@ import {
   approveProductById, 
   rejectProductById 
 } from '../services/productService.js';
-import ProductModel from '../models/productModel.js';
 import logger from "../utils/logger.js";
 
 // Add a product
