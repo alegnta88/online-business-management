@@ -1,4 +1,5 @@
 import { createProduct, getProducts, deleteProduct, getProductById, approveProductById, rejectProductById } from '../services/productService.js';
+import logger from "../utils/logger.js";
 
 export const addProduct = async (req, res) => {
   try {
@@ -15,6 +16,7 @@ export const addProduct = async (req, res) => {
       product,
     });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -26,6 +28,7 @@ export const listProduct = async (req, res) => {
     const data = await getProducts(req.query, user);
     res.status(200).json({ success: true, ...data });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -36,6 +39,7 @@ export const removeProduct = async (req, res) => {
     await deleteProduct(id);
     res.status(200).json({ success: true, message: 'Product removed successfully' });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -46,6 +50,7 @@ export const singleProduct = async (req, res) => {
     const product = await getProductById(id);
     res.status(200).json({ success: true, product });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(404).json({ success: false, message: error.message });
   }
 };
@@ -59,6 +64,7 @@ export const approveProduct = async (req, res) => {
       product,
     });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -72,6 +78,7 @@ export const rejectProduct = async (req, res) => {
       product,
     });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

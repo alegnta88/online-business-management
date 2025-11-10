@@ -3,13 +3,13 @@ import { createOrderService, getOrdersByCustomerService, getAllOrdersService, up
 import { sendSMS } from '../utils/sendSMS.js';
 import OrderModel from '../models/orderModel.js';
 import CustomerModel from '../models/customerModel.js';
+import logger from '../utils/logger.js';
 
 export const createOrder = async (req, res) => {
   try {
     const customerId = req.user.id;
 
     const customer = await CustomerModel.findById(customerId);
-
     if (!customer) throw new Error('Customer not found');
     const order = await createOrderService(customer, req.body.items, req.body.shippingAddress);
 
@@ -19,6 +19,7 @@ export const createOrder = async (req, res) => {
       order 
     });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -28,6 +29,7 @@ export const getMyOrders = async (req, res) => {
     const orders = await getOrdersByCustomerService(req.user.id);
     res.status(200).json({ success: true, orders });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -37,6 +39,7 @@ export const getAllOrders = async (req, res) => {
     const orders = await getAllOrdersService();
     res.status(200).json({ success: true, orders });
   } catch (error) {
+    logger.error("Error creating order: %o", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -53,7 +56,7 @@ export const updateOrderStatus = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Order status updated', order });
   } catch (error) {
-    console.error('Error updating order:', error.message);
+    logger.error("Error creating order: %o", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
