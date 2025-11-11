@@ -70,7 +70,7 @@ export const adminVerifyOTPController = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const token = verifyAdminOTP(email, otp);
+    const token = await verifyAdminOTP(email, otp);
 
     res.json({
       success: true,
