@@ -1,10 +1,10 @@
 import { 
-  registerUserService, 
-  loginUserService, 
+  registerUserService,  
   activateUserById, 
   deactivateUserById,
   createAdminOTP,
-  verifyAdminOTP
+  verifyAdminOTP,
+  loginUserService
 } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
 
@@ -66,18 +66,16 @@ export const adminLogin = async (req, res) => {
   }
 };
 
-export const adminVerifyOTPController = async (req, res) => {
+export const verifyAdminOTPController = async (req, res) => {
   try {
     const { email, otp } = req.body;
-
     const token = await verifyAdminOTP(email, otp);
 
     res.json({
       success: true,
-      message: 'Admin login successful',
-      token
+      message: 'Admin 2FA verified successfully',
+      token,
     });
-
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -109,20 +107,41 @@ export const deactivateUser = async (req, res) => {
   }
 };
 
-export const loginUser = async (req, res) => {
+export const loginController = async (req, res) => {
   try {
-    const { user, token } = await loginUserService(req.body);
+    const { email, password } = req.body;
 
-    if (user.role !== 'user') {
-      return res.status(403).json({ success: false, message: 'Access denied. Not a user.' });
+    if (email === process.env.ADMIN_EMAIL) {
+      if (password !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+      }
+
+      await createAdminOTP(email, password);
+      return res.json({
+        success: true,
+        message: 'OTP sent to your email. Please verify to complete admin login.'
+      });
+    }
+
+    const { user, token } = await loginUserService({ email, password });
+
+    if (!user.isActive) {
+      return res.status(403).json({ success: false, message: 'Account is deactivated' });
     }
 
     res.json({
-      message: 'Login successful',
+      success: true,
+      message: `Login successful as ${user.role}`,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
+
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
