@@ -5,7 +5,6 @@ import CustomerModel from "../models/customerModel.js";
 export const assignRole = async (req, res) => {
   try {
     const { userId, role } = req.body;
-    console.log(userId, role);
 
     if (req.user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Access denied. Admins only." });
@@ -14,27 +13,43 @@ export const assignRole = async (req, res) => {
     const allowedRoles = ["user", "admin", "customer"];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ success: false, message: "Invalid role" });
-    }
+    } 
 
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      userId,
-      { role },
-      { new: true }
-    );
-
-    if (!updatedUser) {
+    const existingUser = await UserModel.findById(userId);
+    if (!existingUser) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
+
+    if (existingUser.role === role) {
+      return res.status(400).json({
+        success: false,
+        message: `User is already assigned the role '${role}'`
+      });
+    }
+
+    existingUser.role = role;
+    await existingUser.save();
+
+    const safeUser = {
+      id: existingUser._id,
+      name: existingUser.name,
+      email: existingUser.email,
+      role: existingUser.role,
+      isActive: existingUser.isActive,
+      createdAt: existingUser.createdAt,
+      updatedAt: existingUser.updatedAt,
+    };
 
     res.json({
       success: true,
       message: `Role updated successfully to ${role}`,
-      user: updatedUser,
+      user: safeUser,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 export const getAllAdmins = async (req, res) => {
   try {
