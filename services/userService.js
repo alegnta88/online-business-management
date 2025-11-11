@@ -93,7 +93,5 @@ export const verifyAdminOTP = async (email, otp) => {
   await redisClient.del(`otp:admin-login:${email}`);
 
   const token = generateToken({ role: 'admin', email });
-  console.log('Admin logged in successfully for email:', email);
-  console.log('Generated token for admin:', token);
   return { token, message: 'Admin logged in successfully.' };
 };
