@@ -10,7 +10,6 @@ const userAuth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Check if the user role is admin
     if (decoded.role !== 'user') {
       return res.status(403).json({ success: false, message: 'Access denied. User only.' });
     }

@@ -1,10 +1,9 @@
 import UserModel from "../models/userModel.js";
-import RoleModel from "../models/roleModel.js";
-import CustomerModel from "../models/customerModel.js";
+import { assignPermissionsService } from "../services/permissionService.js";
 
 export const assignRole = async (req, res) => {
   try {
-    const { userId, role } = req.body;
+    const { id, role } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Access denied. Admins only." });
@@ -15,7 +14,7 @@ export const assignRole = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid role" });
     } 
 
-    const existingUser = await UserModel.findById(userId);
+    const existingUser = await UserModel.findById(id);
     if (!existingUser) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -76,3 +75,30 @@ export const getAllAdmins = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const assignPermissions = async (req, res) => {
+  try {
+    const { id, customPermissions } = req.body;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Access denied. Admins only." });
+    }
+
+    const updatedUser = await assignPermissionsService(id, customPermissions);
+
+    res.json({
+      success: true,
+      message: "Permissions updated successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        permissions: updatedUser.permissions,
+        customPermissions: updatedUser.customPermissions,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
