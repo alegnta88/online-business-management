@@ -15,7 +15,6 @@ import categoryRouter from './routes/categoryRoute.js';
 
 dotenv.config();
 
-// app config
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -40,7 +39,6 @@ app.get('/', (req, res) => {
   res.status(200).send('App is running');
 });
 
-// Error handling
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,

@@ -29,7 +29,6 @@ const loginLimiter = rateLimit({
 });
 
 const customerRouter = express.Router();
-
 customerRouter.post('/register', registerCustomer);
 customerRouter.post('/verify', verifyOTP);
 
