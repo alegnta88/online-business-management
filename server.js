@@ -12,6 +12,7 @@ import orderRouter from './routes/orderRoute.js';
 import customerRouter from './routes/customerRoute.js';
 import cartRouter from './routes/cartRoute.js';
 import categoryRouter from './routes/categoryRoute.js';
+import adminRouter from './routes/adminRoute.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use("/api/v1/orders", orderRouter);
 app.use('/api/v1/customers', customerRouter);
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/admins', adminRouter);
 
 app.get('/', (req, res) => {
   res.status(200).send('App is running');

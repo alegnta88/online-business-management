@@ -32,20 +32,6 @@ export const registerUserService = async ({ name, email, phone, password }, isAd
   return user;
 };
 
-export const loginUserService = async ({ email, password }) => {
-  const user = await UserModel.findOne({ email });
-  if (!user) throw new Error('User not found');
-  if (user.role !== 'user') throw new Error('Access denied. Not a user');
-  if (!user.isVerified) throw new Error('Please verify your account first');
-  if (!user.isActive) throw new Error('Your account has been deactivated. Contact support.');
-
-  const isMatch = await comparePassword(password, user.password);
-  if (!isMatch) throw new Error('Invalid credentials');
-
-  const token = generateToken({ id: user._id, email: user.email, role: user.role });
-  return { user, token };
-};
-
 export const deactivateUserById = async (id) => {
   const user = await UserModel.findById(id);
   if (!user) throw new Error('User not found');
@@ -94,4 +80,20 @@ export const verifyAdminOTP = async (email, otp) => {
 
   const token = generateToken({ role: 'admin', email });
   return { token, message: 'Admin logged in successfully.' };
+};
+
+export const loginUserService = async ({ email, password }) => {
+  const user = await UserModel.findOne({ email });
+  if (!user) throw new Error("User not found");
+
+  const isMatch = await comparePassword(password, user.password);
+  if (!isMatch) throw new Error("Invalid credentials");
+
+  const token = generateToken({
+    id: user._id,
+    role: user.role,
+    email: user.email,
+  });
+
+  return { user, token };
 };
