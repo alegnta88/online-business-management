@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import UserModel from '../models/userModel.js';
 
-export default function adminOrUserAuth(req, res, next) {
+export default async function adminOrUserAuth(req, res, next) {
   try {
     const token = req.headers.authorization?.split(' ')[1] || req.headers.token;
     if (!token) {
@@ -9,17 +10,24 @@ export default function adminOrUserAuth(req, res, next) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (decoded.role === 'admin' || decoded.role === 'user') {
-      req.user = decoded; 
+    const user = await UserModel.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    if (user.role === 'admin' || user.role === 'user') {
+      req.user = user; 
+      console.log('Fetched user from DB:', user);
+      console.log('customPermissions:', user.customPermissions);
       return next();
     }
 
     return res.status(403).json({
       success: false,
-      message: 'Access denied. Only admins or users can add products.',
+      message: 'Access denied. Only admins or users can perform this action.',
     });
   } catch (error) {
     console.error('Auth error:', error);
-    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+    return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
   }
 }
