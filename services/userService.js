@@ -95,3 +95,15 @@ export const loginUserService = async ({ email, password }) => {
 
   return { user, token };
 };
+
+export const fetchUsersService = async (limit = 10, cursor = null) => {
+  const query = { role: 'user' };
+  if (cursor) query._id = { $gt: cursor };
+
+  const users = await UserModel.find(query)
+    .select('-password')
+    .sort({ _id: -1 })
+    .limit(limit);
+    const nextCursor = users.length ? users[users.length - 1]._id : null;
+  return { users, nextCursor };
+};
