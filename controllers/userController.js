@@ -2,11 +2,10 @@ import {
   registerUserService,  
   activateUserById, 
   deactivateUserById,
-  createAdminOTP,
   fetchUsersService
 } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
-import { handleLogin, handleAdminOTPVerification } from '../services/authService.js';
+import { handleLogin } from '../services/authService.js';
 
 export const registerUserByAdmin = async (req, res) => {
   try {
@@ -36,36 +35,6 @@ export const getAllUsers = async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const adminLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    await createAdminOTP(email, password);
-
-    res.json({
-      success: true,
-      message: 'OTP sent to your email. Verify to complete login.'
-    });
-
-  } catch (error) {
-    res.status(error.message === 'Invalid admin credentials' ? 401 : 500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
-export const verifyAdminOTPController = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    const result = await handleAdminOTPVerification({ email, otp });
-
-    res.json({ success: true, ...result });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
 };
 
