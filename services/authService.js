@@ -1,4 +1,3 @@
-import { createAdminOTP, verifyAdminOTP, loginUserService } from './userService.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import UserModel from '../models/userModel.js';

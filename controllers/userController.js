@@ -74,3 +74,13 @@ export const loginController = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+export const verifyAdminOTP = async (req, res) => {
+  try {
+    const {email, otp} = req.body;
+    const result = await handleadminOTP
+    
+  } catch (error) {
+    
+  }
+}

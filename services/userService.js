@@ -50,36 +50,6 @@ export const activateUserById = async (id) => {
   return user;
 };
 
-export const createAdminOTP = async (email, password) => {
-  if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
-    console.log('Invalid admin login attempt for email:', email);
-    throw new Error('Invalid admin credentials');
-  }
-
-  const otp = generateOTP(6);
-  await redisClient.setEx(`otp:admin-login:${email}`, 300, otp);
-
-  const emailSent = await sendEmail(
-    email,
-    'Admin Login OTP',
-    `Use this code to finish your login: ${otp}`
-  );
-  if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
-
-  return { message: 'OTP sent to admin email.' };
-};
-
-export const verifyAdminOTP = async (email, otp) => {
-  const storedOtp = await redisClient.get(`otp:admin-login:${email}`);
-  if (!storedOtp) throw new Error('OTP expired or not found');
-  if (storedOtp !== otp) throw new Error('Invalid OTP');
-
-  await redisClient.del(`otp:admin-login:${email}`);
-
-  const token = generateToken({ role: 'admin', email });
-  return { token, message: 'Admin logged in successfully.' };
-};
-
 export const loginUserService = async ({ email, password }) => {
   const user = await UserModel.findOne({ email });
   if (!user) throw new Error("User not found");
