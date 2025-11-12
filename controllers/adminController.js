@@ -109,3 +109,34 @@ export const assignPermissions = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const revokePermissions = async (req, res) => {
+  try {
+    const { id, revokePermissions } = req.body;
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Access denied. Admins only." });
+    }
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const updatedPermissions = (user.customPermissions || []).filter(
+      perm => !revokePermissions.includes(perm)
+    ); 
+    user.customPermissions = updatedPermissions;
+    const updatedUser = await user.save();
+    res.json({
+      success: true,
+      message: "Permissions revoked successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        customPermissions: updatedUser.customPermissions,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
