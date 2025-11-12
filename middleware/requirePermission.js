@@ -5,7 +5,6 @@ export const requirePermission = (permission) => {
     if (!user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
     const userPermissions = user.permissions || [];
 
     if (!userPermissions.includes(permission)) {
