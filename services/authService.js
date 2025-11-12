@@ -36,13 +36,3 @@ export const handleLogin = async ({ email, password }) => {
     }
   };
 };
-
-export const handleAdminOTPVerification = async ({ email, otp }) => {
-  if (email !== process.env.ADMIN_EMAIL) {
-    throw new Error('Unauthorized email for admin OTP');
-  }
-
-  const { token, message } = await verifyAdminOTP(email, otp);
-
-  return { token, message };
-};
