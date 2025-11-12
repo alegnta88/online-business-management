@@ -84,7 +84,16 @@ export const assignPermissions = async (req, res) => {
       return res.status(403).json({ success: false, message: "Access denied. Admins only." });
     }
 
-    const updatedUser = await assignPermissionsService(id, customPermissions);
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const existingPermissions = user.customPermissions || [];
+    const mergedPermissions = Array.from(new Set([...existingPermissions, ...customPermissions]));
+
+    user.customPermissions = mergedPermissions;
+    const updatedUser = await user.save();
 
     res.json({
       success: true,
@@ -93,7 +102,6 @@ export const assignPermissions = async (req, res) => {
         id: updatedUser._id,
         name: updatedUser.name,
         role: updatedUser.role,
-        permissions: updatedUser.permissions,
         customPermissions: updatedUser.customPermissions,
       },
     });
@@ -101,4 +109,3 @@ export const assignPermissions = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
