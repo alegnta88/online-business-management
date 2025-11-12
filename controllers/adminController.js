@@ -1,5 +1,5 @@
 import UserModel from "../models/userModel.js";
-import { assignPermissionsService } from "../services/permissionService.js";
+import { createAdminOTPService, verifyAdminOTPService } from "../services/adminService.js";
 
 export const assignRole = async (req, res) => {
   try {
@@ -48,7 +48,6 @@ export const assignRole = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 export const getAllAdmins = async (req, res) => {
   try {
@@ -138,5 +137,25 @@ export const revokePermissions = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const createAdminOTPController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await createAdminOTPService(email, password);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const verifyAdminOTPController = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const result = await verifyAdminOTPService(email, otp);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };

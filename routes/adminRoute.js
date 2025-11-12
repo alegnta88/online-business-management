@@ -1,9 +1,18 @@
 import express from "express";
-import { assignRole, getAllAdmins } from "../controllers/adminController.js";
+import {
+  createAdminOTPController,
+  verifyAdminOTPController,
+  assignRole,
+  assignPermissions,
+  revokePermissions,
+  getAllAdmins
+} from "../controllers/adminController.js";
 import adminAuth from "../middleware/adminAuth.js";
-import { assignPermissions, revokePermissions } from "../controllers/adminController.js";
 
 const adminRouter = express.Router();
+
+adminRouter.post('/login', createAdminOTPController);
+adminRouter.post('/verify-otp', verifyAdminOTPController);
 
 adminRouter.get('/', adminAuth, getAllAdmins);
 adminRouter.put('/assign-role', adminAuth, assignRole);
