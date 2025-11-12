@@ -11,12 +11,6 @@ export const loginController = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    console.log('User from database:', {
-      id: user._id,
-      email: user.email,
-      customPermissions: user.customPermissions
-    });
-
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Invalid password" });
@@ -32,8 +26,6 @@ export const loginController = async (req, res) => {
       email: user.email,
       permissions: user.customPermissions || [], 
     };
-
-    console.log('Token payload being created:', tokenPayload);
 
     const token = generateToken(tokenPayload);
 

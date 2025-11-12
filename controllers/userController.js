@@ -10,7 +10,6 @@ import { handleLogin, handleAdminOTPVerification } from '../services/authService
 export const registerUserByAdmin = async (req, res) => {
   try {
     const user = await registerUserService({ ...req.body, role: 'user' }, true);
-    console.log('Rrequest body', req.body);
     res.status(201).json({
       message: 'User registered successfully by admin.',
       userId: user._id,
