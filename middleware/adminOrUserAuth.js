@@ -17,8 +17,6 @@ export default async function adminOrUserAuth(req, res, next) {
 
     if (user.role === 'admin' || user.role === 'user') {
       req.user = user; 
-      console.log('Fetched user from DB:', user);
-      console.log('customPermissions:', user.customPermissions);
       return next();
     }
 
