@@ -25,7 +25,7 @@ export const getAllUsers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const cursor = req.query.cursor;
 
-    const query = { role: 'user' }; 
+    const query = { role: 'user' };
     if (cursor) query._id = { $gt: cursor };
 
     const users = await UserModel.find(query)
