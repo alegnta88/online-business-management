@@ -7,6 +7,7 @@ import {
   activateUser, 
   deactivateUser 
 } from '../controllers/userController.js';
+
 import adminAuth from '../middleware/adminAuth.js';
 import { requirePermission } from '../middleware/requirePermission.js';
 import adminOrUserAuth from '../middleware/adminOrUserAuth.js';

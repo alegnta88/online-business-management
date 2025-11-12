@@ -2,7 +2,8 @@ import {
   registerUserService,  
   activateUserById, 
   deactivateUserById,
-  createAdminOTP
+  createAdminOTP,
+  fetchUsersService
 } from '../services/userService.js';
 import UserModel from '../models/userModel.js';
 import { handleLogin, handleAdminOTPVerification } from '../services/authService.js';
@@ -25,15 +26,7 @@ export const getAllUsers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const cursor = req.query.cursor;
 
-    const query = { role: 'user' };
-    if (cursor) query._id = { $gt: cursor };
-
-    const users = await UserModel.find(query)
-      .select('-password')
-      .sort({ _id: -1 })
-      .limit(limit);
-
-    const nextCursor = users.length ? users[users.length - 1]._id : null;
+    const { users, nextCursor } = await fetchUsersService(limit, cursor);
 
     res.json({
       success: true,
