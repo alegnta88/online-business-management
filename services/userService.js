@@ -6,8 +6,6 @@ import { sendEmail } from '../utils/sendEmail.js';
 import { sendSMS } from '../utils/sendSMS.js';
 import redisClient from '../config/redis.js';
 
-const adminOtpStore = {};
-
 export const registerUserService = async ({ name, email, phone, password }, isAdmin = false) => {
   if (!isAdmin) throw new Error('Only admin can create users');
 
@@ -88,12 +86,11 @@ export const loginUserService = async ({ email, password }) => {
 
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
-
   const token = generateToken({
     id: user._id,
     role: user.role,
     email: user.email,
-    permissions: user.permissions || []
+    permissions: user.customPermissions || []
   });
 
   return { user, token };
