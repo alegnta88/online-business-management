@@ -16,13 +16,14 @@ export const createAdminOTPService = async (email, password) => {
 
   await redisClient.setEx(`otp:admin-login:${email}`, 300, otp);
 
-  const emailSent = await sendEmail(
-    email,
-    'Admin Login OTP',
-    `<p>Hello ${admin.name},</p>
-     <p>Your login verification code is <b>${otp}</b>.</p>
-     <p>The code will expire in 5 minutes.</p>`
-  );
+const emailSent = await sendEmail(
+  email,
+  'Admin Login OTP',
+  `Hello ${admin.name},
+
+Your login verification code is ${otp}.
+The code will expire in 5 minutes.`
+);
 
   if (!emailSent) throw new Error('Failed to send OTP. Please try again.');
 
