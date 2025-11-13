@@ -11,8 +11,6 @@ const customerSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     cartData: { type: Object, default: {} },
     twoFactorEnabled: { type: Boolean, default: false },
-    twoFactorCode: { type: String },
-    twoFactorExpiresAt: { type: Date },
     resetPasswordOTP: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
   },
