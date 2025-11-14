@@ -12,9 +12,11 @@ spec:
       labels:
         app: ecom-app
     spec:
+      terminationGracePeriodSeconds: 6
       containers:
         - name: ecom-app
           image: ecom-app:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 5000
           envFrom:
