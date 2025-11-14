@@ -6,3 +6,5 @@ uploads/
 .env.docker
 .dockerignore
 logs/
+secrets.yaml
+*/secrets.yaml
