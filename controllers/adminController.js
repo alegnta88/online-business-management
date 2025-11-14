@@ -144,6 +144,7 @@ export const createAdminOTPController = async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await createAdminOTPService(email, password);
+    
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
