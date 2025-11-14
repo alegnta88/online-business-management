@@ -8,3 +8,4 @@ uploads/
 logs/
 secrets.yaml
 */secrets.yaml
+kubernetes-config/secret.yaml
