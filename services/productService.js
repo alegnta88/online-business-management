@@ -3,7 +3,6 @@ import CategoryModel from '../models/categoryModel.js';
 import { uploadImage, deleteImage } from './cloudinaryService.js';
 import mongoose from 'mongoose';
 
-// Create a new product
 export const createProduct = async (data, files, user) => {
   const { name, price, description, category, subcategory, sizes, bestseller, stock } = data;
 
@@ -65,7 +64,6 @@ export const createProduct = async (data, files, user) => {
   return await product.save();
 };
 
-// List products
 export const getProducts = async (queryParams, user) => {
   const limit = parseInt(queryParams.limit) || 8;
   const cursor = queryParams.cursor;
@@ -93,7 +91,6 @@ export const getProducts = async (queryParams, user) => {
   return { products: resultProducts, nextCursor, hasMore };
 };
 
-// Delete product
 export const deleteProduct = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error('Invalid product ID');
@@ -111,7 +108,6 @@ export const deleteProduct = async (id) => {
   return true;
 };
 
-// Get single product
 export const getProductById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error('Invalid product ID');
@@ -121,7 +117,6 @@ export const getProductById = async (id) => {
   return product;
 };
 
-// Approve product
 export const approveProductById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
   const product = await ProductModel.findById(id);
@@ -131,7 +126,6 @@ export const approveProductById = async (id) => {
   return product;
 };
 
-// Reject product
 export const rejectProductById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
   const product = await ProductModel.findById(id);
@@ -141,7 +135,6 @@ export const rejectProductById = async (id) => {
   return product;
 };
 
-// Update product stock
 export const updateStockById = async (id, stock) => {
   if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid product ID');
   if (stock == null || stock < 0) throw new Error('Stock must be a non-negative number');
