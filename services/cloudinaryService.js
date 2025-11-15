@@ -2,7 +2,6 @@ import { cloudinary, connectCloudinary } from '../config/cloudinary.js';
 
 connectCloudinary();
 
-// Upload a single image
 export const uploadImage = async (filePath) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
@@ -16,7 +15,6 @@ export const uploadImage = async (filePath) => {
   }
 };
 
-// Delete image by Id
 export const deleteImage = async (imageUrl) => {
   try {
     const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
