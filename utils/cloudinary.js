@@ -1,4 +1,3 @@
-// utils/cloudinary.js
 import { cloudinary } from '../config/cloudinary.js';
 
 export const uploadToCloudinary = async (filePath) => {

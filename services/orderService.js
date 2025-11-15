@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 import { sendSMS } from '../utils/sendSMS.js';
 import CustomerModel from '../models/customerModel.js';
 
-// new order service
 export const createOrderService = async (customer, items, shippingAddress) => {
   if (!items || items.length === 0) throw new Error("No items in the order");
 
@@ -21,12 +20,10 @@ export const createOrderService = async (customer, items, shippingAddress) => {
 
     const quantity = item.quantity || 1;
 
-    // Check stock
     if (product.stock < quantity) {
       throw new Error(`Insufficient stock for ${product.name}. Available: ${product.stock}`);
     }
-
-    // Reduce stock
+    
     product.stock -= quantity;
     await product.save();
 
