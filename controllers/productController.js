@@ -8,7 +8,6 @@ import {
 } from '../services/productService.js';
 import logger from "../utils/logger.js";
 
-// Add a product
 export const addProduct = async (req, res) => {
   try {
     const user = req.user;
@@ -35,7 +34,6 @@ export const addProduct = async (req, res) => {
   }
 };
 
-// List products
 export const listProduct = async (req, res) => {
   try {
     const user = req.user;
@@ -47,7 +45,6 @@ export const listProduct = async (req, res) => {
   }
 };
 
-// Remove a product
 export const removeProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -59,7 +56,6 @@ export const removeProduct = async (req, res) => {
   }
 };
 
-// Get single product
 export const singleProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -71,7 +67,6 @@ export const singleProduct = async (req, res) => {
   }
 };
 
-// Approve a product
 export const approveProduct = async (req, res) => {
   try {
     const product = await approveProductById(req.params.id);
@@ -86,7 +81,6 @@ export const approveProduct = async (req, res) => {
   }
 };
 
-// Reject a product
 export const rejectProduct = async (req, res) => {
   try {
     const product = await rejectProductById(req.params.id);
@@ -101,7 +95,6 @@ export const rejectProduct = async (req, res) => {
   }
 };
 
-// Update stock
 export const updateStock = async (req, res) => {
   try {
     const { id } = req.params;
