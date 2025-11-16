@@ -16,6 +16,7 @@ const adminAuth = async (req, res, next) => {
 
     req.user = decoded;
 
+
     next();
   } catch (error) {
     console.error('Admin auth error:', error);
